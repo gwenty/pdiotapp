@@ -30,8 +30,26 @@ class PredictionActivity : AppCompatActivity() {
 
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
+    // N.B. when we classify all classes, idxs array will not be needed
     private val idxs = arrayOf(3,8)
-    private val icons = arrayOf(R.drawable.standing, R.drawable.walking)
+    private val icons = arrayOf(R.drawable.sitting,
+                                R.drawable.sitting,
+                                R.drawable.sitting,
+                                R.drawable.standing,
+                                R.drawable.lying,
+                                R.drawable.lying,
+                                R.drawable.lying,
+                                R.drawable.lying,
+                                R.drawable.walking,
+                                R.drawable.running,
+                                R.drawable.stairs,
+                                R.drawable.stairs,
+                                R.drawable.desk,
+                                R.drawable.movement,
+                                R.drawable.falling,
+                                R.drawable.falling,
+                                R.drawable.falling,
+                                R.drawable.falling)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +77,7 @@ class PredictionActivity : AppCompatActivity() {
             output.text = max_prob.toString()
             current_activity.text = labels[idxs[max_idx]]
 
-            activity_icon.setImageResource(icons[max_idx])
+            activity_icon.setImageResource(icons[idxs[max_idx]])
         }
     }
 
