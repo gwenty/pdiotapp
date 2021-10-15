@@ -8,9 +8,11 @@ import org.tensorflow.lite.Interpreter
 import android.content.res.AssetFileDescriptor
 import java.io.IOException
 import android.content.res.AssetManager
+import android.content.res.Resources
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_prediction.*
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -23,21 +25,38 @@ class PredictionActivity : AppCompatActivity() {
     lateinit var input: EditText
     lateinit var output: TextView
     lateinit var button: Button
+    lateinit var current_activity : TextView
     lateinit var tflite: Interpreter
+
+    private var labels : Array<String> = emptyArray()
+    // standing 0->3, walking 1->8
+    private val idxs = arrayOf(3,8)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_prediction)
 
+        val res: Resources = resources
+        labels = res.getStringArray( R.array.activity_types ) ;
+
         input = findViewById(R.id.input)
         output = findViewById(R.id.ouput)
         button = findViewById(R.id.button)
+        current_activity = findViewById(R.id.current_activity)
 
         tflite = Interpreter(loadModelFile())
 
         button.setOnClickListener {
-            val prediction = inference(input.text.toString())
-            output.text = prediction.toString()
+//            val prediction = inference(input.text.toString())
+//            output.text = prediction.toString()
+
+            val example_prediction = arrayOf(0.33, 0.67)
+            // TODO what happens if null?
+            val max_prob = example_prediction.maxOrNull()
+            val max_idx = example_prediction.asList().indexOf(max_prob)
+            
+            output.text = max_prob.toString()
+            current_activity.text = labels[idxs[max_idx]]
         }
     }
 

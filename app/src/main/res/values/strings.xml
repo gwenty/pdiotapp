@@ -52,4 +52,25 @@
     <string name="thingy_accel">Accel = (%1$.3f, %2$.3f, %3$.3f)</string>
     <string name="thingy_gyro">Gyro = (%1$.3f, %2$.3f, %3$.3f)</string>
     <string name="thingy_mag">Mag = (%1$.3f, %2$.3f, %3$.3f)</string>
+    
+    <string-array name="activity_types">
+        <item>Sitting</item>
+        <item>Sitting bent forward</item>
+        <item>Sitting bent backward</item>
+        <item>Standing</item>
+        <item>Lying down left</item>
+        <item>Lying down right</item>
+        <item>Lying down on stomach</item>
+        <item>Lying down on back</item>
+        <item>Walking at normal speed</item>
+        <item>Running</item>
+        <item>Climbing stairs</item>
+        <item>Descending stairs</item>
+        <item>Desk work</item>
+        <item>Movement</item>
+        <item>Falling on knees</item>
+        <item>Falling on the back</item>
+        <item>Falling on the left</item>
+        <item>Falling on the right</item>
+    </string-array>
 </resources>
