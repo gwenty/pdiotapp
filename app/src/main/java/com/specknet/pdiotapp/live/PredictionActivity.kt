@@ -47,27 +47,23 @@ class PredictionActivity : AppCompatActivity() {
         tflite = Interpreter(loadModelFile())
 
         button.setOnClickListener {
-//            val prediction = inference(input.text.toString())
-//            output.text = prediction.toString()
+            val test_instance = readTestInstance()
+            val prediction = inference(test_instance)
 
-            val example_prediction = arrayOf(0.33, 0.67)
             // TODO what happens if null?
-            val max_prob = example_prediction.maxOrNull()
-            val max_idx = example_prediction.asList().indexOf(max_prob)
+            val max_prob = prediction.maxOrNull()
+            val max_idx = prediction.asList().indexOf(max_prob)
             
             output.text = max_prob.toString()
             current_activity.text = labels[idxs[max_idx]]
         }
     }
 
-    fun inference(s: String) : Float {
-        val inputValue = FloatArray(1)
-        inputValue[0] = s.toFloat()
-
-        val inner = FloatArray(1)
+    fun inference(input: Array<FloatArray>) : FloatArray {
+        val inner = FloatArray(2)
         val outputValue: Array<FloatArray> = arrayOf(inner)
-        tflite.run(inputValue, outputValue)
-        return outputValue[0][0]
+        tflite.run(input, outputValue)
+        return outputValue[0]
     }
 
     /** Memory-map the model file in Assets.  */
@@ -82,7 +78,7 @@ class PredictionActivity : AppCompatActivity() {
     }
 
     private fun getModelPath(): String {
-        return "simple_tensorflow_lite_model.tflite"
+        return "cnn_walking_standing.tflite"
     }
 
     // For later - not in use
@@ -96,6 +92,26 @@ class PredictionActivity : AppCompatActivity() {
         }
         reader.close()
         return labels
+    }
+
+    private fun readTestInstance(): Array<FloatArray> {
+        val rows = 50
+        val cols = 6
+        val reader = BufferedReader(InputStreamReader(assets.open("test_instance15.txt")))
+        var counter = 0
+        val test_instance = Array(rows) { FloatArray(cols) }
+        while (true) {
+            val line = reader.readLine() ?: break
+            val split: List<String> = line.split("\\s".toRegex())
+            val farray = FloatArray(cols)
+            for (i in 0..cols-1) {
+                farray[i] = split[i].toFloat()
+            }
+            test_instance[counter] = farray
+            counter ++
+        }
+        reader.close()
+        return test_instance
     }
 }
 
