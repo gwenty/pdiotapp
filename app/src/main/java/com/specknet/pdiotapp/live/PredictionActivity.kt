@@ -30,14 +30,33 @@ class PredictionActivity : AppCompatActivity() {
 
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
+    // N.B. when we classify all classes, idxs array will not be needed
     private val idxs = arrayOf(3,8)
+    private val icons = arrayOf(R.drawable.sitting,
+                                R.drawable.sitting,
+                                R.drawable.sitting,
+                                R.drawable.standing,
+                                R.drawable.lying,
+                                R.drawable.lying,
+                                R.drawable.lying,
+                                R.drawable.lying,
+                                R.drawable.walking,
+                                R.drawable.running,
+                                R.drawable.stairs,
+                                R.drawable.stairs,
+                                R.drawable.desk,
+                                R.drawable.movement,
+                                R.drawable.falling,
+                                R.drawable.falling,
+                                R.drawable.falling,
+                                R.drawable.falling)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_prediction)
 
         val res: Resources = resources
-        labels = res.getStringArray( R.array.activity_types ) ;
+        labels = res.getStringArray( R.array.activity_types )
 
         input = findViewById(R.id.input)
         output = findViewById(R.id.ouput)
@@ -53,9 +72,11 @@ class PredictionActivity : AppCompatActivity() {
             // TODO what happens if null?
             val max_prob = prediction.maxOrNull()
             val max_idx = prediction.asList().indexOf(max_prob)
-            
+
             output.text = max_prob.toString()
             current_activity.text = labels[idxs[max_idx]]
+
+            activity_icon.setImageResource(icons[idxs[max_idx]])
         }
     }
 
@@ -97,7 +118,7 @@ class PredictionActivity : AppCompatActivity() {
     private fun readTestInstance(): Array<FloatArray> {
         val rows = 50
         val cols = 6
-        val reader = BufferedReader(InputStreamReader(assets.open("test_instance15.txt")))
+        val reader = BufferedReader(InputStreamReader(assets.open("test_instance0.txt")))
         var counter = 0
         val test_instance = Array(rows) { FloatArray(cols) }
         while (true) {
