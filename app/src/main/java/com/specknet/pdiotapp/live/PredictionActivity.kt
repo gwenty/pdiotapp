@@ -31,6 +31,7 @@ class PredictionActivity : AppCompatActivity() {
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
     private val idxs = arrayOf(3,8)
+    private val icons = arrayOf(R.drawable.standing, R.drawable.walking)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,13 +51,15 @@ class PredictionActivity : AppCompatActivity() {
 //            val prediction = inference(input.text.toString())
 //            output.text = prediction.toString()
 
-            val example_prediction = arrayOf(0.33, 0.67)
+            val example_prediction = arrayOf(input.text.toString().toFloat(), 1-input.text.toString().toFloat())
             // TODO what happens if null?
             val max_prob = example_prediction.maxOrNull()
             val max_idx = example_prediction.asList().indexOf(max_prob)
-            
+
             output.text = max_prob.toString()
             current_activity.text = labels[idxs[max_idx]]
+
+            activity_icon.setImageResource(icons[max_idx])
         }
     }
 
