@@ -17,13 +17,20 @@ import java.nio.channels.FileChannel
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import com.specknet.pdiotapp.R
 import com.specknet.pdiotapp.utils.Constants
 import com.specknet.pdiotapp.utils.RESpeckLiveData
+import java.time.Instant
 import kotlin.collections.ArrayList
+
 
 
 class PredictionActivity : AppCompatActivity() {
@@ -39,18 +46,21 @@ class PredictionActivity : AppCompatActivity() {
     var gyrYList = FloatArray(windowsize)
     var gyrZList = FloatArray(windowsize)
 
-    lateinit var respeckLiveUpdateReceiver: BroadcastReceiver
-
     lateinit var input: EditText
     lateinit var output: TextView
     lateinit var button: Button
     lateinit var current_activity : TextView
     lateinit var tflite: Interpreter
 
+    // global broadcast receiver so we can unregister it
+    lateinit var respeckLiveUpdateReceiver: BroadcastReceiver
+    lateinit var looperRespeck: Looper
+    val filterTestRespeck = IntentFilter(Constants.ACTION_RESPECK_LIVE_BROADCAST)
+
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
     // N.B. when we classify all classes, idxs array will not be needed
-    private val idxs = arrayOf(3,8)
+    private val idxs = arrayOf(7,9)
     private val icons = arrayOf(R.drawable.sitting,
                                 R.drawable.sitting,
                                 R.drawable.sitting,
@@ -83,6 +93,11 @@ class PredictionActivity : AppCompatActivity() {
         current_activity = findViewById(R.id.current_activity)
 
         tflite = Interpreter(loadModelFile())
+
+        val color = arrayOf(Color.RED, Color.GREEN)
+        var i = 0
+
+        var lastUpdate = System.currentTimeMillis()
 
         button.setOnClickListener {
             val test_instance = readTestInstance()
@@ -134,23 +149,51 @@ class PredictionActivity : AppCompatActivity() {
                     count += 1
 
                     if (count == windowsize) {
-                        var arr = arrayOf(accXList,accYList,accZList,gyrXList,gyrYList,gyrZList)
-                        val prediction = inference(arr)
+                        var arr =
+                            arrayOf(accXList, accYList, accZList, gyrXList, gyrYList, gyrZList)
+                        runOnUiThread {
+                            val prediction = inference(arr)
 
-                        // TODO what happens if null?
-                        val max_prob = prediction.maxOrNull()
-                        val max_idx = prediction.asList().indexOf(max_prob)
+                            // TODO what happens if null?
+                            val max_prob = prediction.maxOrNull()
+                            val max_idx = prediction.asList().indexOf(max_prob)
 
-                        output.text = max_prob.toString()
-                        current_activity.text = labels[idxs[max_idx]]
+                            output.text = prediction[0].toString() + " " + prediction[1].toString()
+                            current_activity.text = labels[idxs[max_idx]]
 
-                        activity_icon.setImageResource(icons[idxs[max_idx]])
+                            activity_icon.setImageResource(icons[idxs[max_idx]])
+
+                            button.setBackgroundColor(color[i]);
+                            if (i==0) {
+                                i = 1
+                            }
+                            else if (i==1) {
+                                i = 0
+                            }
+
+                            time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
+                            lastUpdate = System.currentTimeMillis()
+                        }
 
                         count = 0
+                        accXList = FloatArray(windowsize)
+                        accYList = FloatArray(windowsize)
+                        accZList = FloatArray(windowsize)
+
+                        gyrXList = FloatArray(windowsize)
+                        gyrYList = FloatArray(windowsize)
+                        gyrZList = FloatArray(windowsize)
                     }
                 }
             }
         }
+
+        // register receiver on another thread
+        val handlerThreadRespeck = HandlerThread("bgThreadRespeckLive")
+        handlerThreadRespeck.start()
+        looperRespeck = handlerThreadRespeck.looper
+        val handlerRespeck = Handler(looperRespeck)
+        this.registerReceiver(respeckLiveUpdateReceiver, filterTestRespeck, null, handlerRespeck)
     }
 
     fun inference(input: Array<FloatArray>) : FloatArray {
@@ -172,7 +215,7 @@ class PredictionActivity : AppCompatActivity() {
     }
 
     private fun getModelPath(): String {
-        return "cnn_walking_standing.tflite"
+        return "cnn_lyingback_running.tflite"
     }
 
     // For later - not in use
