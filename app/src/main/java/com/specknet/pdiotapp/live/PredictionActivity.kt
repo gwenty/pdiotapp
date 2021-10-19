@@ -38,13 +38,8 @@ class PredictionActivity : AppCompatActivity() {
     //Joe: BlueTooth variables
     var count = 0
     var windowsize = 50
-    var accXList = FloatArray(windowsize)
-    var accYList = FloatArray(windowsize)
-    var accZList = FloatArray(windowsize)
 
-    var gyrXList = FloatArray(windowsize)
-    var gyrYList = FloatArray(windowsize)
-    var gyrZList = FloatArray(windowsize)
+    var arr = Array(windowsize) { FloatArray(6) }
 
     lateinit var input: EditText
     lateinit var output: TextView
@@ -60,7 +55,7 @@ class PredictionActivity : AppCompatActivity() {
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
     // N.B. when we classify all classes, idxs array will not be needed
-    private val idxs = arrayOf(7,9)
+    private val idxs = arrayOf(3,8)
     private val icons = arrayOf(R.drawable.sitting,
                                 R.drawable.sitting,
                                 R.drawable.sitting,
@@ -138,19 +133,22 @@ class PredictionActivity : AppCompatActivity() {
                     val gyrz = liveData.gyro.z
 
                     //add to data table
-                    accXList[count] = accx
-                    accYList[count] = accy
-                    accZList[count] = accz
+                    //accXList[count] = accx
+                    //accYList[count] = accy
+                    //accZList[count] = accz
 
-                    gyrXList[count] = gyrx
-                    gyrYList[count] = gyry
-                    gyrZList[count] = gyrz
+                    //gyrXList[count] = gyrx
+                    //gyrYList[count] = gyry
+                    //gyrZList[count] = gyrz
+
+                    arr[count] = floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz)
+
 
                     count += 1
 
                     if (count == windowsize) {
-                        var arr =
-                            arrayOf(accXList, accYList, accZList, gyrXList, gyrYList, gyrZList)
+                        //var arr =
+                        //    arrayOf(accXList, accYList, accZList, gyrXList, gyrYList, gyrZList)
                         runOnUiThread {
                             val prediction = inference(arr)
 
@@ -176,13 +174,6 @@ class PredictionActivity : AppCompatActivity() {
                         }
 
                         count = 0
-                        accXList = FloatArray(windowsize)
-                        accYList = FloatArray(windowsize)
-                        accZList = FloatArray(windowsize)
-
-                        gyrXList = FloatArray(windowsize)
-                        gyrYList = FloatArray(windowsize)
-                        gyrZList = FloatArray(windowsize)
                     }
                 }
             }
@@ -215,7 +206,7 @@ class PredictionActivity : AppCompatActivity() {
     }
 
     private fun getModelPath(): String {
-        return "cnn_lyingback_running.tflite"
+        return "cnn_walking_standing.tflite"
     }
 
     // For later - not in use
