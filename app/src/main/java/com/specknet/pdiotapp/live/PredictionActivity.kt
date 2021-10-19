@@ -1,8 +1,6 @@
 package com.specknet.pdiotapp.live
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import com.specknet.pdiotapp.R
+import android.annotation.SuppressLint
 import org.tensorflow.lite.Interpreter
 
 import android.content.res.AssetFileDescriptor
@@ -18,15 +16,42 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.*
+import androidx.appcompat.app.AppCompatActivity
+import android.util.Log
+import com.specknet.pdiotapp.R
+import com.specknet.pdiotapp.utils.Constants
+import com.specknet.pdiotapp.utils.RESpeckLiveData
+import com.specknet.pdiotapp.utils.ThingyLiveData
+import kotlin.collections.ArrayList
 
 
-class PredictionActivity : AppCompatActivity() {
+class PredictionActivity() : AppCompatActivity(){
 
     lateinit var input: EditText
     lateinit var output: TextView
     lateinit var button: Button
     lateinit var current_activity : TextView
     lateinit var tflite: Interpreter
+
+    //Joe: Joe's variables
+    var count = 0
+    var windowsize = 50
+    var accXList = FloatArray(windowsize)
+    var accYList = FloatArray(windowsize)
+    var accZList = FloatArray(windowsize)
+
+    var gyrXList = FloatArray(windowsize)
+    var gyrYList = FloatArray(windowsize)
+    var gyrZList = FloatArray(windowsize)
+
+    lateinit var respeckLiveUpdateReceiver: BroadcastReceiver
+
+    //TODO: sliding windows
 
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
@@ -51,12 +76,14 @@ class PredictionActivity : AppCompatActivity() {
                                 R.drawable.falling,
                                 R.drawable.falling)
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_prediction)
 
         val res: Resources = resources
-        labels = res.getStringArray( R.array.activity_types )
+        labels = res.getStringArray(R.array.activity_types)
 
         input = findViewById(R.id.input)
         output = findViewById(R.id.ouput)
@@ -77,6 +104,62 @@ class PredictionActivity : AppCompatActivity() {
             current_activity.text = labels[idxs[max_idx]]
 
             activity_icon.setImageResource(icons[idxs[max_idx]])
+        }
+
+        //Joe: initialising the respeck Receiver
+        respeckLiveUpdateReceiver = object : BroadcastReceiver() {
+
+            override fun onReceive(context: Context, intent: Intent) {
+
+                Log.i("thread", "I am running on thread = " + Thread.currentThread().name)
+
+                val action = intent.action
+
+                if (action == Constants.ACTION_RESPECK_LIVE_BROADCAST) {
+
+                    val liveData =
+                        intent.getSerializableExtra(Constants.RESPECK_LIVE_DATA) as RESpeckLiveData
+                    Log.d("Live", "onReceive: liveData = " + liveData)
+
+                    // get all relevant intent contents
+                    val accx = liveData.accelX
+                    val accy = liveData.accelY
+                    val accz = liveData.accelZ
+
+                    val gyrx = liveData.gyro.x
+                    val gyry = liveData.gyro.y
+                    val gyrz = liveData.gyro.z
+
+                    //add to data table
+                    accXList[count] = accx
+                    accYList[count] = accy
+                    accZList[count] = accz
+
+                    gyrXList[count] = gyrx
+                    gyrYList[count] = gyry
+                    gyrZList[count] = gyrz
+
+                    count += 1
+
+                    if (count == windowsize) {
+                        var arr = arrayOf(accXList,accYList,accZList,gyrXList,gyrYList,gyrZList)
+                        val prediction = inference(arr)
+
+                        // TODO what happens if null?
+                        val max_prob = prediction.maxOrNull()
+                        val max_idx = prediction.asList().indexOf(max_prob)
+
+                        output.text = max_prob.toString()
+                        current_activity.text = labels[idxs[max_idx]]
+
+                        activity_icon.setImageResource(icons[idxs[max_idx]])
+
+                        count = 0
+                    }
+
+
+                }
+            }
         }
     }
 
@@ -125,16 +208,17 @@ class PredictionActivity : AppCompatActivity() {
             val line = reader.readLine() ?: break
             val split: List<String> = line.split("\\s".toRegex())
             val farray = FloatArray(cols)
-            for (i in 0..cols-1) {
+            for (i in 0..cols - 1) {
                 farray[i] = split[i].toFloat()
             }
             test_instance[counter] = farray
-            counter ++
+            counter++
         }
         reader.close()
         return test_instance
     }
 }
+
 
 
 
