@@ -1,8 +1,6 @@
 package com.specknet.pdiotapp.live
 
-import android.annotation.SuppressLint
 import org.tensorflow.lite.Interpreter
-
 import android.content.res.AssetFileDescriptor
 import java.io.IOException
 import android.content.res.AssetManager
@@ -14,31 +12,23 @@ import kotlinx.android.synthetic.main.activity_prediction.*
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
-import java.nio.MappedByteBuffer
+import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.os.*
+import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import com.specknet.pdiotapp.R
 import com.specknet.pdiotapp.utils.Constants
 import com.specknet.pdiotapp.utils.RESpeckLiveData
-import com.specknet.pdiotapp.utils.ThingyLiveData
 import kotlin.collections.ArrayList
 
 
-class PredictionActivity() : AppCompatActivity(){
+class PredictionActivity : AppCompatActivity() {
 
-    lateinit var input: EditText
-    lateinit var output: TextView
-    lateinit var button: Button
-    lateinit var current_activity : TextView
-    lateinit var tflite: Interpreter
-
-    //Joe: Joe's variables
+    //Joe: BlueTooth variables
     var count = 0
     var windowsize = 50
     var accXList = FloatArray(windowsize)
@@ -51,7 +41,11 @@ class PredictionActivity() : AppCompatActivity(){
 
     lateinit var respeckLiveUpdateReceiver: BroadcastReceiver
 
-    //TODO: sliding windows
+    lateinit var input: EditText
+    lateinit var output: TextView
+    lateinit var button: Button
+    lateinit var current_activity : TextView
+    lateinit var tflite: Interpreter
 
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
@@ -76,14 +70,12 @@ class PredictionActivity() : AppCompatActivity(){
                                 R.drawable.falling,
                                 R.drawable.falling)
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_prediction)
 
         val res: Resources = resources
-        labels = res.getStringArray(R.array.activity_types)
+        labels = res.getStringArray( R.array.activity_types )
 
         input = findViewById(R.id.input)
         output = findViewById(R.id.ouput)
@@ -156,8 +148,6 @@ class PredictionActivity() : AppCompatActivity(){
 
                         count = 0
                     }
-
-
                 }
             }
         }
@@ -172,7 +162,7 @@ class PredictionActivity() : AppCompatActivity(){
 
     /** Memory-map the model file in Assets.  */
     @Throws(IOException::class)
-    private fun loadModelFile(): MappedByteBuffer {
+    private fun loadModelFile(): ByteBuffer {
         val fileDescriptor: AssetFileDescriptor = this.assets.openFd(getModelPath())
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
         val fileChannel: FileChannel = inputStream.channel
@@ -208,18 +198,13 @@ class PredictionActivity() : AppCompatActivity(){
             val line = reader.readLine() ?: break
             val split: List<String> = line.split("\\s".toRegex())
             val farray = FloatArray(cols)
-            for (i in 0..cols - 1) {
+            for (i in 0..cols-1) {
                 farray[i] = split[i].toFloat()
             }
             test_instance[counter] = farray
-            counter++
+            counter ++
         }
         reader.close()
         return test_instance
     }
 }
-
-
-
-
-
