@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.activity_prediction.*
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
-import java.nio.MappedByteBuffer
+import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 
 
@@ -89,7 +89,7 @@ class PredictionActivity : AppCompatActivity() {
 
     /** Memory-map the model file in Assets.  */
     @Throws(IOException::class)
-    private fun loadModelFile(): MappedByteBuffer {
+    private fun loadModelFile(): ByteBuffer {
         val fileDescriptor: AssetFileDescriptor = this.assets.openFd(getModelPath())
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
         val fileChannel: FileChannel = inputStream.channel
