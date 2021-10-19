@@ -82,7 +82,6 @@ class PredictionActivity : AppCompatActivity() {
         val res: Resources = resources
         labels = res.getStringArray( R.array.activity_types )
 
-        input = findViewById(R.id.input)
         output = findViewById(R.id.ouput)
         button = findViewById(R.id.button)
         current_activity = findViewById(R.id.current_activity)
@@ -156,7 +155,7 @@ class PredictionActivity : AppCompatActivity() {
                             val max_prob = prediction.maxOrNull()
                             val max_idx = prediction.asList().indexOf(max_prob)
 
-                            output.text = prediction[0].toString() + " " + prediction[1].toString()
+                            output.text = max_prob.toString()
                             current_activity.text = labels[idxs[max_idx]]
 
                             activity_icon.setImageResource(icons[idxs[max_idx]])
