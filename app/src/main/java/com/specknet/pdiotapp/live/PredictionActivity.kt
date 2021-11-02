@@ -37,7 +37,8 @@ class PredictionActivity : AppCompatActivity() {
 
     //Joe: BlueTooth variables
     var count = 0
-    var windowsize = 50
+    var windowsize = 20
+    var n_classes = 18
 
     var arr = Array(windowsize) { FloatArray(6) }
 
@@ -102,9 +103,11 @@ class PredictionActivity : AppCompatActivity() {
             val max_idx = prediction.asList().indexOf(max_prob)
 
             output.text = max_prob.toString()
-            current_activity.text = labels[idxs[max_idx]]
+            // current_activity.text = labels[idxs[max_idx]]
+            current_activity.text = labels[max_idx]
 
-            activity_icon.setImageResource(icons[idxs[max_idx]])
+            // activity_icon.setImageResource(icons[idxs[max_idx]])
+            activity_icon.setImageResource(icons[max_idx])
         }
 
         //Joe: initialising the respeck Receiver
@@ -156,9 +159,11 @@ class PredictionActivity : AppCompatActivity() {
                             val max_idx = prediction.asList().indexOf(max_prob)
 
                             output.text = max_prob.toString()
-                            current_activity.text = labels[idxs[max_idx]]
+                            //current_activity.text = labels[idxs[max_idx]]
+                            current_activity.text = labels[max_idx]
 
-                            activity_icon.setImageResource(icons[idxs[max_idx]])
+                            //activity_icon.setImageResource(icons[idxs[max_idx]])
+                            activity_icon.setImageResource(icons[max_idx])
 
                             button.setBackgroundColor(color[i]);
                             if (i==0) {
@@ -187,7 +192,7 @@ class PredictionActivity : AppCompatActivity() {
     }
 
     fun inference(input: Array<FloatArray>) : FloatArray {
-        val inner = FloatArray(2)
+        val inner = FloatArray(n_classes)
         val outputValue: Array<FloatArray> = arrayOf(inner)
         tflite.run(input, outputValue)
         return outputValue[0]
@@ -205,7 +210,7 @@ class PredictionActivity : AppCompatActivity() {
     }
 
     private fun getModelPath(): String {
-        return "cnn_walking_standing.tflite"
+        return "cnn_simple_full.tflite"
     }
 
     // For later - not in use
@@ -222,9 +227,9 @@ class PredictionActivity : AppCompatActivity() {
     }
 
     private fun readTestInstance(): Array<FloatArray> {
-        val rows = 50
+        val rows = windowsize
         val cols = 6
-        val reader = BufferedReader(InputStreamReader(assets.open("test_instance0.txt")))
+        val reader = BufferedReader(InputStreamReader(assets.open("test_instance_window20_0.txt")))
         var counter = 0
         val test_instance = Array(rows) { FloatArray(cols) }
         while (true) {
