@@ -28,6 +28,7 @@ import android.util.Log
 import com.specknet.pdiotapp.R
 import com.specknet.pdiotapp.utils.Constants
 import com.specknet.pdiotapp.utils.RESpeckLiveData
+import com.specknet.pdiotapp.utils.ThingyLiveData
 import java.time.Instant
 import kotlin.collections.ArrayList
 
@@ -37,8 +38,13 @@ class PredictionActivity : AppCompatActivity() {
 
     //Joe: BlueTooth variables
     var count = 0
+    var countThingy = 0
     var windowsize = 20
     var n_classes = 18
+
+    val updateButtonColor = arrayOf(Color.RED, Color.GREEN)
+    lateinit var respeckPrediction: FloatArray
+    lateinit var thingyPrediction: FloatArray
 
     var arr = Array(windowsize) { FloatArray(6) }
 
@@ -46,12 +52,16 @@ class PredictionActivity : AppCompatActivity() {
     lateinit var output: TextView
     lateinit var button: Button
     lateinit var current_activity : TextView
-    lateinit var tflite: Interpreter
+    lateinit var respeckClassifier: Interpreter
+    lateinit var thingyClassifier: Interpreter
 
     // global broadcast receiver so we can unregister it
     lateinit var respeckLiveUpdateReceiver: BroadcastReceiver
     lateinit var looperRespeck: Looper
     val filterTestRespeck = IntentFilter(Constants.ACTION_RESPECK_LIVE_BROADCAST)
+    lateinit var thingyLiveUpdateReceiver: BroadcastReceiver
+    lateinit var looperThingy: Looper
+    val filterTestThingy = IntentFilter(Constants.ACTION_THINGY_BROADCAST)
 
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
@@ -87,18 +97,23 @@ class PredictionActivity : AppCompatActivity() {
         button = findViewById(R.id.button)
         current_activity = findViewById(R.id.current_activity)
 
-        tflite = Interpreter(loadModelFile())
+        respeckClassifier = Interpreter(loadModelFile(getRespeckModelPath()))
+        thingyClassifier = Interpreter(loadModelFile(getThingyModelPath()))
 
-        val color = arrayOf(Color.RED, Color.GREEN)
+        thingyPrediction = FloatArray(n_classes)
+        respeckPrediction = FloatArray(n_classes)
+
         var i = 0
 
         var lastUpdate = System.currentTimeMillis()
 
         button.setOnClickListener {
             val test_instance = readTestInstance()
-            val prediction = inference(test_instance)
+            val respeckPrediction = inference(test_instance, respeckClassifier)
+            val thingyPrediction = inference(test_instance, thingyClassifier)
 
             // TODO what happens if null?
+            val prediction = sumPredictions(respeckPrediction, thingyPrediction)
             val max_prob = prediction.maxOrNull()
             val max_idx = prediction.asList().indexOf(max_prob)
 
@@ -134,38 +149,16 @@ class PredictionActivity : AppCompatActivity() {
                     val gyry = liveData.gyro.y
                     val gyrz = liveData.gyro.z
 
-                    //add to data table
-                    //accXList[count] = accx
-                    //accYList[count] = accy
-                    //accZList[count] = accz
-
-                    //gyrXList[count] = gyrx
-                    //gyrYList[count] = gyry
-                    //gyrZList[count] = gyrz
-
                     arr[count] = floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz)
 
 
                     count += 1
 
                     if (count == windowsize) {
-                        //var arr =
-                        //    arrayOf(accXList, accYList, accZList, gyrXList, gyrYList, gyrZList)
                         runOnUiThread {
-                            val prediction = inference(arr)
+                            respeckPrediction = inference(arr, respeckClassifier)
+                            updatePrediction(i)
 
-                            // TODO what happens if null?
-                            val max_prob = prediction.maxOrNull()
-                            val max_idx = prediction.asList().indexOf(max_prob)
-
-                            output.text = max_prob.toString()
-                            //current_activity.text = labels[idxs[max_idx]]
-                            current_activity.text = labels[max_idx]
-
-                            //activity_icon.setImageResource(icons[idxs[max_idx]])
-                            activity_icon.setImageResource(icons[max_idx])
-
-                            button.setBackgroundColor(color[i]);
                             if (i==0) {
                                 i = 1
                             }
@@ -189,19 +182,108 @@ class PredictionActivity : AppCompatActivity() {
         looperRespeck = handlerThreadRespeck.looper
         val handlerRespeck = Handler(looperRespeck)
         this.registerReceiver(respeckLiveUpdateReceiver, filterTestRespeck, null, handlerRespeck)
+
+        // set up the broadcast receiver
+        thingyLiveUpdateReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+
+                Log.i("thread", "I am running on thread = " + Thread.currentThread().name)
+
+                val action = intent.action
+
+                if (action == Constants.ACTION_THINGY_BROADCAST) {
+
+                    val liveData =
+                        intent.getSerializableExtra(Constants.THINGY_LIVE_DATA) as ThingyLiveData
+                    Log.d("Live", "onReceive: liveData = " + liveData)
+
+                    // get all relevant intent contents
+                    val accx = liveData.accelX
+                    val accy = liveData.accelY
+                    val accz = liveData.accelZ
+
+                    val gyrx = liveData.gyro.x
+                    val gyry = liveData.gyro.y
+                    val gyrz = liveData.gyro.z
+
+                    arr[countThingy] = floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz)
+
+
+                    countThingy += 1
+
+                    if (countThingy == windowsize) {
+                        runOnUiThread {
+                            thingyPrediction = inference(arr, thingyClassifier)
+                            updatePrediction(i)
+
+                            if (i == 0) {
+                                i = 1
+                            } else if (i == 1) {
+                                i = 0
+                            }
+
+                            time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
+                            lastUpdate = System.currentTimeMillis()
+                        }
+
+                        countThingy = 0
+                    }
+                }
+            }
+        }
+
+        // register receiver on another thread
+        val handlerThreadThingy = HandlerThread("bgThreadThingyLive")
+        handlerThreadThingy.start()
+        looperThingy = handlerThreadThingy.looper
+        val handlerThingy = Handler(looperThingy)
+        this.registerReceiver(thingyLiveUpdateReceiver, filterTestThingy, null, handlerThingy)
     }
 
-    fun inference(input: Array<FloatArray>) : FloatArray {
+    private fun sumPredictions(prediction1 : FloatArray, prediction2 : FloatArray) : FloatArray{
+        val meanPrediction = FloatArray(prediction1.size)
+        for (i in 0 until prediction1.size) {
+            meanPrediction[i] = ( prediction1[i] + prediction2[i] ) / 2
+        }
+        return meanPrediction
+    }
+
+    fun inference(input: Array<FloatArray>, classifier: Interpreter) : FloatArray {
         val inner = FloatArray(n_classes)
         val outputValue: Array<FloatArray> = arrayOf(inner)
-        tflite.run(input, outputValue)
+        classifier.run(input, outputValue)
         return outputValue[0]
+    }
+
+    private fun updatePrediction(i : Int) {
+
+        // If both predictions are available, combine. Otherwise use only existing
+        lateinit var prediction : FloatArray
+        if (thingyPrediction.sum() == 0f)
+            prediction = respeckPrediction
+        else if (respeckPrediction.sum() == 0f)
+            prediction = thingyPrediction
+        else
+            prediction = sumPredictions(respeckPrediction, thingyPrediction)
+
+        // TODO what happens if null?
+        val max_prob = prediction.maxOrNull()
+        val max_idx = prediction.asList().indexOf(max_prob)
+
+        output.text = max_prob.toString()
+        //current_activity.text = labels[idxs[max_idx]]
+        current_activity.text = labels[max_idx]
+
+        //activity_icon.setImageResource(icons[idxs[max_idx]])
+        activity_icon.setImageResource(icons[max_idx])
+
+        button.setBackgroundColor(updateButtonColor[i])
     }
 
     /** Memory-map the model file in Assets.  */
     @Throws(IOException::class)
-    private fun loadModelFile(): ByteBuffer {
-        val fileDescriptor: AssetFileDescriptor = this.assets.openFd(getModelPath())
+    private fun loadModelFile(modelPath : String): ByteBuffer {
+        val fileDescriptor: AssetFileDescriptor = this.assets.openFd(modelPath)
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
         val fileChannel: FileChannel = inputStream.channel
         val startOffset = fileDescriptor.startOffset
@@ -209,8 +291,12 @@ class PredictionActivity : AppCompatActivity() {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    private fun getModelPath(): String {
+    private fun getRespeckModelPath(): String {
         return "cnn_simple_full.tflite"
+    }
+
+    private fun getThingyModelPath(): String {
+        return "cnn_simple_full_thingy.tflite"
     }
 
     // For later - not in use
