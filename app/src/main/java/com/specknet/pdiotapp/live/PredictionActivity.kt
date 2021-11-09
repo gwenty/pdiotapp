@@ -29,9 +29,13 @@ import com.specknet.pdiotapp.R
 import com.specknet.pdiotapp.utils.Constants
 import com.specknet.pdiotapp.utils.RESpeckLiveData
 import com.specknet.pdiotapp.utils.ThingyLiveData
+import java.lang.Exception
+import java.net.HttpURLConnection
+import java.net.URL
 import java.time.Instant
 import kotlin.collections.ArrayList
-
+import com.google.gson.Gson
+import java.net.URLEncoder
 
 
 class PredictionActivity : AppCompatActivity() {
@@ -112,17 +116,26 @@ class PredictionActivity : AppCompatActivity() {
             val respeckPrediction = inference(test_instance, respeckClassifier)
             val thingyPrediction = inference(test_instance, thingyClassifier)
 
+            val thread = Thread {
+                try {
+                    var prediction = sendGet()
+                    if (prediction != null) {
+                        runOnUiThread {
+                            // change UI elements here
+                            updatePredictionOutput(prediction)
+                        }
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            thread.start()
+
             // TODO what happens if null?
-            val prediction = sumPredictions(respeckPrediction, thingyPrediction)
-            val max_prob = prediction.maxOrNull()
-            val max_idx = prediction.asList().indexOf(max_prob)
-
-            output.text = max_prob.toString()
-            // current_activity.text = labels[idxs[max_idx]]
-            current_activity.text = labels[max_idx]
-
-            // activity_icon.setImageResource(icons[idxs[max_idx]])
-            activity_icon.setImageResource(icons[max_idx])
+            //val prediction = sumPredictions(respeckPrediction, thingyPrediction)
+            //updatePredictionOutput(prediction)
         }
 
         //Joe: initialising the respeck Receiver
@@ -240,6 +253,18 @@ class PredictionActivity : AppCompatActivity() {
         this.registerReceiver(thingyLiveUpdateReceiver, filterTestThingy, null, handlerThingy)
     }
 
+    private fun updatePredictionOutput(prediction : FloatArray) {
+        val max_prob = prediction.maxOrNull()
+        val max_idx = prediction.asList().indexOf(max_prob)
+
+        output.text = max_prob.toString()
+        // current_activity.text = labels[idxs[max_idx]]
+        current_activity.text = labels[max_idx]
+
+        // activity_icon.setImageResource(icons[idxs[max_idx]])
+        activity_icon.setImageResource(icons[max_idx])
+    }
+
     private fun sumPredictions(prediction1 : FloatArray, prediction2 : FloatArray) : FloatArray{
         val meanPrediction = FloatArray(prediction1.size)
         for (i in 0 until prediction1.size) {
@@ -266,16 +291,7 @@ class PredictionActivity : AppCompatActivity() {
         else
             prediction = sumPredictions(respeckPrediction, thingyPrediction)
 
-        // TODO what happens if null?
-        val max_prob = prediction.maxOrNull()
-        val max_idx = prediction.asList().indexOf(max_prob)
-
-        output.text = max_prob.toString()
-        //current_activity.text = labels[idxs[max_idx]]
-        current_activity.text = labels[max_idx]
-
-        //activity_icon.setImageResource(icons[idxs[max_idx]])
-        activity_icon.setImageResource(icons[max_idx])
+        updatePredictionOutput(prediction)
 
         button.setBackgroundColor(updateButtonColor[i])
     }
@@ -290,6 +306,34 @@ class PredictionActivity : AppCompatActivity() {
         val declaredLength = fileDescriptor.declaredLength
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
+
+    fun sendGet(): FloatArray {
+        var test_instance_array = readTestInstance()
+        var test_instance = Gson().toJson(test_instance_array)
+        var params = URLEncoder.encode("instance", "UTF-8") + "=" + URLEncoder.encode(
+            test_instance, "UTF-8")
+
+        Log.i("requests","Sending request")
+        val response = URL("http://pdiot.eu.pythonanywhere.com/respeck_prediction?"+params).readText()
+        Log.i("requests",response)
+
+        var map: Map<String, ArrayList<ArrayList<Double>>> = HashMap()
+        map = Gson().fromJson(response, map.javaClass)
+        var pred : ArrayList<Double>? = map["prediction"]?.get(0)
+
+        val floatArray = FloatArray(n_classes)
+        var i = 0
+
+        if (pred != null) {
+            for (f in pred) {
+                floatArray[i++] = f.toFloat() ?: Float.NaN // Or whatever default you want.
+            }
+        }
+
+        return floatArray
+    }
+
+
 
     private fun getRespeckModelPath(): String {
         return "cnn_simple_full.tflite"
