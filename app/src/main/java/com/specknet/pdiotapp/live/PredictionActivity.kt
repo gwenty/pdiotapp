@@ -168,7 +168,7 @@ class PredictionActivity : AppCompatActivity() {
                     count +=1
 
 
-                    if (contQueueRespeck.size == windowsize && count == 10) {
+                    if (contQueueRespeck.size == windowsize && count >= 10) {
                         runOnUiThread {
                             //Converting the queue to an array.
                             respeckPrediction = inference(contQueueRespeck.toTypedArray(), respeckClassifier)
@@ -248,7 +248,7 @@ class PredictionActivity : AppCompatActivity() {
 
                     countThingy +=1
 
-                    if (contQueueThingy.size == windowsize && countThingy == 10) {
+                    if (contQueueThingy.size == windowsize && countThingy >= 10) {
                         runOnUiThread {
                             //Converting the queue to an array.
                             thingyPrediction = inference(contQueueThingy.toTypedArray(), thingyClassifier)
