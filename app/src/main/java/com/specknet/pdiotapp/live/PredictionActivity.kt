@@ -51,6 +51,8 @@ class PredictionActivity : AppCompatActivity() {
     var countThingy = 0
     var windowsize = 20
     var n_classes = 18
+
+    var checkTime = 10
     //Joe: continuous window variables
     //initialising the queue here :)
     val contQueueRespeck: Queue<FloatArray> = LinkedList<FloatArray>()
@@ -60,8 +62,6 @@ class PredictionActivity : AppCompatActivity() {
     val updateButtonColor = arrayOf(Color.RED, Color.GREEN)
     lateinit var respeckPrediction: FloatArray
     lateinit var thingyPrediction: FloatArray
-
-    var arr = Array(windowsize) { FloatArray(6) }
 
     lateinit var input: EditText
     lateinit var output: TextView
@@ -178,7 +178,7 @@ class PredictionActivity : AppCompatActivity() {
                     count +=1
 
 
-                    if (contQueueRespeck.size == windowsize && count >= 10) {
+                    if (contQueueRespeck.size == windowsize && count >= checkTime) {
                         var collected_instance = contQueueRespeck.toTypedArray()
 
                         val thread = Thread {
@@ -211,29 +211,6 @@ class PredictionActivity : AppCompatActivity() {
                         count = 0
                     }
 
-                    //Joe: commenting out old window system
-                    /*
-                    arr[count] = floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz)
-                    count += 1
-                    if (count == windowsize) {
-                        runOnUiThread {
-                            respeckPrediction = inference(arr, respeckClassifier)
-                            updatePrediction(i)
-
-                            if (i==0) {
-                                i = 1
-                            }
-                            else if (i==1) {
-                                i = 0
-                            }
-
-                            time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
-                            lastUpdate = System.currentTimeMillis()
-                        }
-
-                        count = 0
-                    }
-                     */
                 }
             }
         }
@@ -278,7 +255,7 @@ class PredictionActivity : AppCompatActivity() {
 
                     countThingy +=1
 
-                    if (contQueueThingy.size == windowsize && countThingy >= 10) {
+                    if (contQueueThingy.size == windowsize && countThingy >= checkTime) {
                         var collected_instance = contQueueThingy.toTypedArray()
 
                         val thread = Thread {
@@ -310,30 +287,6 @@ class PredictionActivity : AppCompatActivity() {
 
                         countThingy = 0
                     }
-
-                    /*
-                    arr[countThingy] = floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz)
-                    countThingy += 1
-
-                    if (countThingy == windowsize) {
-                        runOnUiThread {
-                            thingyPrediction = inference(arr, thingyClassifier)
-                            updatePrediction(i)
-
-                            if (i == 0) {
-                                i = 1
-                            } else if (i == 1) {
-                                i = 0
-                            }
-
-                            time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
-                            lastUpdate = System.currentTimeMillis()
-                        }
-
-                        countThingy = 0
-                    }
-
-                     */
                 }
             }
         }
