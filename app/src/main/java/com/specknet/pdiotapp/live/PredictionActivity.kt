@@ -37,7 +37,13 @@ import kotlin.collections.ArrayList
 import com.google.gson.Gson
 import java.net.URLEncoder
 
+//Joe: new Imports for queue
+import java.util.Queue
+import java.util.LinkedList
 
+
+
+//This is our self implemented prediction activity.
 class PredictionActivity : AppCompatActivity() {
 
     //Joe: BlueTooth variables
@@ -45,6 +51,11 @@ class PredictionActivity : AppCompatActivity() {
     var countThingy = 0
     var windowsize = 20
     var n_classes = 18
+    //Joe: continuous window variables
+    //initialising the queue here :)
+    val contQueueRespeck: Queue<FloatArray> = LinkedList<FloatArray>()
+    val contQueueThingy: Queue<FloatArray> = LinkedList<FloatArray>()
+
 
     val updateButtonColor = arrayOf(Color.RED, Color.GREEN)
     lateinit var respeckPrediction: FloatArray
@@ -118,29 +129,23 @@ class PredictionActivity : AppCompatActivity() {
 
             val thread = Thread {
                 try {
-                    var prediction = sendGet()
+                    var prediction = sendGet(readTestInstance(), "respeck_prediction")
                     if (prediction != null) {
                         runOnUiThread {
                             // change UI elements here
                             updatePredictionOutput(prediction)
                         }
                     }
-
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
 
             thread.start()
-
-            // TODO what happens if null?
-            //val prediction = sumPredictions(respeckPrediction, thingyPrediction)
-            //updatePredictionOutput(prediction)
         }
 
         //Joe: initialising the respeck Receiver
         respeckLiveUpdateReceiver = object : BroadcastReceiver() {
-
             override fun onReceive(context: Context, intent: Intent) {
 
                 Log.i("thread", "I am running on thread = " + Thread.currentThread().name)
@@ -162,11 +167,54 @@ class PredictionActivity : AppCompatActivity() {
                     val gyry = liveData.gyro.y
                     val gyrz = liveData.gyro.z
 
+                    //Joe: adding new  data to the queue
+                    contQueueRespeck.add(floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz))
+
+                    //If queue > window size then we need to drop the oldest piece of data
+                    while (contQueueRespeck.size > windowsize) {
+                        contQueueRespeck.remove()
+                    }
+
+                    count +=1
+
+
+                    if (contQueueRespeck.size == windowsize && count >= 10) {
+                        var collected_instance = contQueueRespeck.toTypedArray()
+
+                        val thread = Thread {
+                            try {
+                                respeckPrediction = sendGet(collected_instance, "respeck_prediction")
+                                if (respeckPrediction != null) {
+                                    runOnUiThread {
+                                        // change UI elements here
+                                        updatePrediction(i)
+                                        time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
+                                        lastUpdate = System.currentTimeMillis()
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                        thread.start()
+
+                        /* To run prediction locally
+                        runOnUiThread {
+                            //Converting the queue to an array.
+                            respeckPrediction = inference(contQueueRespeck.toTypedArray(), respeckClassifier)
+                            updatePrediction(i)
+
+                            time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
+                            lastUpdate = System.currentTimeMillis()
+                        }*/
+
+                        count = 0
+                    }
+
+                    //Joe: commenting out old window system
+                    /*
                     arr[count] = floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz)
-
-
                     count += 1
-
                     if (count == windowsize) {
                         runOnUiThread {
                             respeckPrediction = inference(arr, respeckClassifier)
@@ -185,6 +233,7 @@ class PredictionActivity : AppCompatActivity() {
 
                         count = 0
                     }
+                     */
                 }
             }
         }
@@ -219,9 +268,51 @@ class PredictionActivity : AppCompatActivity() {
                     val gyry = liveData.gyro.y
                     val gyrz = liveData.gyro.z
 
+                    //Joe: adding new  data to the queue
+                    contQueueThingy.add(floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz))
+
+                    //If queue > window size then we need to drop the oldest piece of data
+                    while (contQueueThingy.size > windowsize) {
+                        contQueueThingy.remove()
+                    }
+
+                    countThingy +=1
+
+                    if (contQueueThingy.size == windowsize && countThingy >= 10) {
+                        var collected_instance = contQueueThingy.toTypedArray()
+
+                        val thread = Thread {
+                            try {
+                                thingyPrediction = sendGet(collected_instance, "thingy_prediction")
+                                if (thingyPrediction != null) {
+                                    runOnUiThread {
+                                        // change UI elements here
+                                        updatePrediction(i)
+                                        time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
+                                        lastUpdate = System.currentTimeMillis()
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                        thread.start()
+
+                        /* //The run prediction locally
+                        runOnUiThread {
+                            //Converting the queue to an array.
+                            thingyPrediction = inference(contQueueThingy.toTypedArray(), thingyClassifier)
+                            updatePrediction(i)
+
+                            time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
+                            lastUpdate = System.currentTimeMillis()
+                        }*/
+
+                        countThingy = 0
+                    }
+
+                    /*
                     arr[countThingy] = floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz)
-
-
                     countThingy += 1
 
                     if (countThingy == windowsize) {
@@ -241,6 +332,8 @@ class PredictionActivity : AppCompatActivity() {
 
                         countThingy = 0
                     }
+
+                     */
                 }
             }
         }
@@ -307,14 +400,13 @@ class PredictionActivity : AppCompatActivity() {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    fun sendGet(): FloatArray {
-        var test_instance_array = readTestInstance()
+    fun sendGet(test_instance_array : Array<FloatArray>, url : String): FloatArray {
         var test_instance = Gson().toJson(test_instance_array)
         var params = URLEncoder.encode("instance", "UTF-8") + "=" + URLEncoder.encode(
             test_instance, "UTF-8")
 
         Log.i("requests","Sending request")
-        val response = URL("http://pdiot.eu.pythonanywhere.com/respeck_prediction?"+params).readText()
+        val response = URL("http://pdiot.eu.pythonanywhere.com/"+ url + "?"+params).readText()
         Log.i("requests",response)
 
         var map: Map<String, ArrayList<ArrayList<Double>>> = HashMap()
@@ -375,4 +467,15 @@ class PredictionActivity : AppCompatActivity() {
         reader.close()
         return test_instance
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(respeckLiveUpdateReceiver)
+        unregisterReceiver(thingyLiveUpdateReceiver)
+        looperRespeck.quit()
+        looperThingy.quit()
+    }
+
 }
+
+
