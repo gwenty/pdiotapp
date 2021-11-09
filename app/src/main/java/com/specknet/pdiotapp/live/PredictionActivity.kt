@@ -51,7 +51,7 @@ class PredictionActivity : AppCompatActivity() {
     //initialising the queue here :)
     val contQueueRespeck: Queue<FloatArray> = LinkedList<FloatArray>()
     val contQueueThingy: Queue<FloatArray> = LinkedList<FloatArray>()
-    
+
 
     val updateButtonColor = arrayOf(Color.RED, Color.GREEN)
     lateinit var respeckPrediction: FloatArray
@@ -165,7 +165,10 @@ class PredictionActivity : AppCompatActivity() {
                         contQueueRespeck.remove()
                     }
 
-                    if (contQueueRespeck.size == windowsize) {
+                    count +=1
+
+
+                    if (contQueueRespeck.size == windowsize && count == 10) {
                         runOnUiThread {
                             //Converting the queue to an array.
                             respeckPrediction = inference(contQueueRespeck.toTypedArray(), respeckClassifier)
@@ -174,6 +177,8 @@ class PredictionActivity : AppCompatActivity() {
                             time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
                             lastUpdate = System.currentTimeMillis()
                         }
+
+                        count = 0
                     }
 
                     //Joe: commenting out old window system
@@ -241,7 +246,9 @@ class PredictionActivity : AppCompatActivity() {
                         contQueueThingy.remove()
                     }
 
-                    if (contQueueThingy.size == windowsize) {
+                    countThingy +=1
+
+                    if (contQueueThingy.size == windowsize && countThingy == 10) {
                         runOnUiThread {
                             //Converting the queue to an array.
                             thingyPrediction = inference(contQueueThingy.toTypedArray(), thingyClassifier)
@@ -250,6 +257,8 @@ class PredictionActivity : AppCompatActivity() {
                             time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
                             lastUpdate = System.currentTimeMillis()
                         }
+
+                        countThingy = 0
                     }
 
                     /*
