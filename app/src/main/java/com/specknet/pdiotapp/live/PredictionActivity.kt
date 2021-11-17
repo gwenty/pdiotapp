@@ -52,12 +52,13 @@ class PredictionActivity : AppCompatActivity() {
     var windowsize = 20
     var n_classes = 18
 
-    var checkTime = 10
+    var checkTime = 20
     //Joe: continuous window variables
     //initialising the queue here :)
     val contQueueRespeck: Queue<FloatArray> = LinkedList<FloatArray>()
     val contQueueThingy: Queue<FloatArray> = LinkedList<FloatArray>()
-
+    //Joe: sync time varibales
+    var timePassed = 0
 
     val updateButtonColor = arrayOf(Color.RED, Color.GREEN)
     lateinit var respeckPrediction: FloatArray
@@ -177,8 +178,9 @@ class PredictionActivity : AppCompatActivity() {
 
                     count +=1
 
-
-                    if (contQueueRespeck.size == windowsize && count >= checkTime) {
+                    var timePassed = System.currentTimeMillis() - lastUpdate
+                    //if (contQueueRespeck.size == windowsize && count >= checkTime && timePassed > 1000) {
+                    if (contQueueRespeck.size == windowsize && timePassed > 1000) {
                         var collected_instance = contQueueRespeck.toTypedArray()
 
                         val thread = Thread {
@@ -248,18 +250,32 @@ class PredictionActivity : AppCompatActivity() {
                     //Joe: adding new  data to the queue
                     contQueueThingy.add(floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz))
 
+
+
                     //If queue > window size then we need to drop the oldest piece of data
                     while (contQueueThingy.size > windowsize) {
                         contQueueThingy.remove()
                     }
 
                     countThingy +=1
+                    timePassed = (System.currentTimeMillis() - lastUpdate).toInt()
 
-                    if (contQueueThingy.size == windowsize && countThingy >= checkTime) {
+                    //if (contQueueThingy.size == windowsize && countThingy >= checkTime && timePassed > 1000) {
+                    if (contQueueThingy.size == windowsize && timePassed > 1000) {
                         var collected_instance = contQueueThingy.toTypedArray()
+
+                        var res_inst = contQueueRespeck.toTypedArray()
+                        lastUpdate = System.currentTimeMillis()
+
 
                         val thread = Thread {
                             try {
+                                if (res_inst.size == windowsize)
+                                {
+                                    respeckPrediction = sendGet(res_inst, "respeck_prediction")
+                                }
+
+
                                 thingyPrediction = sendGet(collected_instance, "thingy_prediction")
                                 if (thingyPrediction != null) {
                                     runOnUiThread {

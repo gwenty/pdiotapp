@@ -12,43 +12,44 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/topText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
-            android:text="I want to"
+            android:text="Welcome:"
             app:layout_constraintBottom_toTopOf="@+id/predict_button"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
 
         <Button
             android:id="@+id/predict_button"
             android:layout_width="550px"
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
-            android:background="#03A9F4"
+            android:background="@drawable/login_btn_bg"
             android:text="Predict activity"
             android:textColor="#FFFFFF"
             app:layout_constraintBottom_toTopOf="@+id/record_button"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+            app:layout_constraintTop_toBottomOf="@+id/topText" />
 
         <Button
             android:id="@+id/record_button"
             android:layout_width="550px"
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
-            android:background="#03A9F4"
+            android:background="@drawable/login_btn_bg"
             android:text="Record data"
             android:textColor="#FFFFFF"
             app:layout_constraintBottom_toTopOf="@+id/live_button"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_bias="0.502"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/predict_button" />
 
@@ -57,7 +58,7 @@
             android:layout_width="550px"
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
-            android:background="#03A9F4"
+            android:background="@drawable/login_btn_bg"
             android:text="Watch live processing"
             android:textColor="#FFFFFF"
             app:layout_constraintBottom_toTopOf="@+id/ble_button"
@@ -71,15 +72,26 @@
             android:layout_width="550px"
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
-            android:layout_marginBottom="100px"
-            android:background="#03A9F4"
+            android:background="@drawable/login_btn_bg"
             android:text="Connect sensors"
             android:textColor="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/live_button" />
+
+        <Button
+            android:id="@+id/logout_button"
+            android:layout_width="550px"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="100px"
+            android:background="@drawable/login_btn_bg"
+            android:text="LogOut"
+            android:textColor="#FFFFFF"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ble_button" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
