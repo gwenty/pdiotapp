@@ -25,6 +25,8 @@ import android.os.HandlerThread
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import android.widget.Toast
+import com.google.firebase.firestore.ktx.firestore
 import com.specknet.pdiotapp.R
 import com.specknet.pdiotapp.utils.Constants
 import com.specknet.pdiotapp.utils.RESpeckLiveData
@@ -38,9 +40,12 @@ import com.google.gson.Gson
 import java.net.URLEncoder
 
 //Joe: new Imports for queue
-import java.util.Queue
-import java.util.LinkedList
 
+//Joe: Imports for firebase
+import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.HashMap
 
 
 //This is our self implemented prediction activity.
@@ -51,6 +56,12 @@ class PredictionActivity : AppCompatActivity() {
     var countThingy = 0
     var windowsize = 20
     var n_classes = 18
+
+    //Joe: data store variables
+    var predictionList : ArrayList<Int> = ArrayList()
+    var userEmailGlob = " "
+
+
 
     var checkTime = 20
     //Joe: continuous window variables
@@ -106,6 +117,9 @@ class PredictionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_prediction)
 
+        var userEmail = intent.getStringExtra("email_id")
+        userEmailGlob = userEmail!!
+
         val res: Resources = resources
         labels = res.getStringArray( R.array.activity_types )
 
@@ -122,6 +136,11 @@ class PredictionActivity : AppCompatActivity() {
         var i = 0
 
         var lastUpdate = System.currentTimeMillis()
+
+        btn_data_save.setOnClickListener {
+            saveData()
+        }
+
 
         button.setOnClickListener {
             val test_instance = readTestInstance()
@@ -325,6 +344,10 @@ class PredictionActivity : AppCompatActivity() {
 
         // activity_icon.setImageResource(icons[idxs[max_idx]])
         activity_icon.setImageResource(icons[max_idx])
+
+
+        //Joe: adding the prediction to the list
+        predictionList.add(max_idx)
     }
 
     private fun sumPredictions(prediction1 : FloatArray, prediction2 : FloatArray) : FloatArray{
@@ -417,6 +440,7 @@ class PredictionActivity : AppCompatActivity() {
         return labels
     }
 
+
     private fun readTestInstance(): Array<FloatArray> {
         val rows = windowsize
         val cols = 6
@@ -436,6 +460,35 @@ class PredictionActivity : AppCompatActivity() {
         reader.close()
         return test_instance
     }
+
+    //This is a function for storing data on the cloud.
+    private fun saveData() {
+        //init of database
+        val db = Firebase.firestore
+        val uploadTime = SimpleDateFormat("dd-MM-yyyy_HH-mm-ss", Locale.UK).format(
+            Date()
+        )
+
+        val dataPacket = hashMapOf(
+            "timeStamp" to uploadTime,
+            "predictionList" to predictionList
+        )
+
+        db.collection(userEmailGlob)
+            .add(dataPacket)
+            .addOnSuccessListener {
+                documentReference ->
+                Toast.makeText(this,"added with ${documentReference.id}",Toast.LENGTH_SHORT)
+            }
+            .addOnFailureListener {
+                e ->
+                Toast.makeText(this,"error: ${e.message}", Toast.LENGTH_SHORT)
+            }
+
+
+
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()

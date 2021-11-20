@@ -18,6 +18,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.specknet.pdiotapp.bluetooth.BluetoothSpeckService
 import com.specknet.pdiotapp.bluetooth.ConnectingActivity
+import com.specknet.pdiotapp.data.DataViewActivity
 import com.specknet.pdiotapp.live.LiveDataActivity
 import com.specknet.pdiotapp.live.PredictionActivity
 import com.specknet.pdiotapp.login.LoginActivity
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity() {
 
     // broadcast receiver
     val filter = IntentFilter()
+    var userEmailGlob = " "
 
     var isUserFirstTime = false
 
@@ -53,9 +55,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val userEmail =  intent.getStringExtra("email_id")
+        var userEmail = intent.getStringExtra("email_id")
         topText.text = "Logged in as: $userEmail"
-
+        userEmailGlob = userEmail!!
         logout_button.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
 
@@ -97,22 +99,44 @@ class MainActivity : AppCompatActivity() {
     fun setupClickListeners() {
         liveProcessingButton.setOnClickListener {
             val intent = Intent(this, LiveDataActivity::class.java)
+            intent.putExtra("email_id",
+                userEmailGlob
+            )
             startActivity(intent)
         }
 
         pairingButton.setOnClickListener {
             val intent = Intent(this, ConnectingActivity::class.java)
+            intent.putExtra("email_id",
+                userEmailGlob
+            )
             startActivity(intent)
         }
 
+        previous_data_button.setOnClickListener {
+            val intent = Intent(this, DataViewActivity::class.java)
+            intent.putExtra("email_id",
+                userEmailGlob
+            )
+            startActivity(intent)
+        }
+
+
         recordButton.setOnClickListener {
             val intent = Intent(this, RecordingActivity::class.java)
+            intent.putExtra("email_id",
+                userEmailGlob
+            )
             startActivity(intent)
         }
 
         predictButton.setOnClickListener {
             val intent = Intent(this, PredictionActivity::class.java)
+            intent.putExtra("email_id",
+                userEmailGlob
+            )
             startActivity(intent)
+
         }
     }
 
