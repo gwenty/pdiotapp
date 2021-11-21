@@ -52,15 +52,32 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
 
         Log.d("ItemAdapter", "Got to onBindViewHolder")
         //We need to init our piechart here.
-
+        var months = arrayOf (
+            "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
+                )
         //Format our timeStamp here
         //Import format is dd-mm-yyyy_hh-mm-ss
         val ts = data.get("timeStamp") as String
         val tsSplit = ts.split('-')
         val day = tsSplit[0]
-        val month = tsSplit[1]
+        var dayApp = "th"
+        if (day.equals("21") or day.equals("1") or day.equals("31")){
+            dayApp = "st"
+        } else if (day.equals("22") or day.equals("2") or day.equals("32")) {
+            dayApp = "nd"
+        } else if (day.equals("23") or day.equals("3") or day.equals("33")) {
+            dayApp = "rd"
+        }
+
+        val month = months[tsSplit[1].toInt()-1]
+
+
+
         val year = tsSplit[2].split("_")[0]
-        val txt = "${day}th ${month} ${year}"
+        val txt = "${day}${dayApp} ${month} ${year}"
+
+
+
         holder.tvTimeStamp.text = txt
 
         //Making piechart here

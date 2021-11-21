@@ -53,7 +53,7 @@ class LoginActivity : AppCompatActivity() {
 
                                 Toast.makeText(
                                     this@LoginActivity,
-                                    "Registration Successful (:",
+                                    "Login Successful (:",
                                     Toast.LENGTH_SHORT
                                 ).show()
 
