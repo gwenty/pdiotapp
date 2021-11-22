@@ -15,9 +15,27 @@
         android:textColor="@color/colorPrimary"
         android:textSize="34sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/date_view2"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"></TextView>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"></TextView>
+
+    <TextView
+        android:id="@+id/date_view2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This will be the text"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date_view"
+        tools:layout_editor_absoluteY="66dp"></TextView>
 
     <com.github.mikephil.charting.charts.PieChart
         android:id="@+id/pie_chart"
@@ -26,7 +44,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/date_view" />
+        app:layout_constraintTop_toBottomOf="@+id/date_view2" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
 
         liveProcessingButton = findViewById(R.id.live_button)
         pairingButton = findViewById(R.id.ble_button)
-        recordButton = findViewById(R.id.record_button)
+        //recordButton = findViewById(R.id.record_button)
         predictButton = findViewById(R.id.predict_button)
 
         permissionAlertDialog = AlertDialog.Builder(this)
@@ -122,13 +122,13 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        recordButton.setOnClickListener {
-            val intent = Intent(this, RecordingActivity::class.java)
-            intent.putExtra("email_id",
-                userEmailGlob
-            )
-            startActivity(intent)
-        }
+//        recordButton.setOnClickListener {
+//            val intent = Intent(this, RecordingActivity::class.java)
+//            intent.putExtra("email_id",
+//                userEmailGlob
+//            )
+//            startActivity(intent)
+//        }
 
         predictButton.setOnClickListener {
             val intent = Intent(this, PredictionActivity::class.java)

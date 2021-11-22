@@ -18,6 +18,7 @@
     <uses-feature android:name="android.hardware.camera" />
 
     <application
+        android:screenOrientation="portrait"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -27,16 +28,21 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".data.DataDisplayActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".data.DataViewActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".login.RegisterActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".login.LoginActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -45,7 +51,8 @@
         </activity>
         <activity
             android:name=".live.PredictionActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"/>
 
         <service
             android:name=".bluetooth.BluetoothSpeckService"

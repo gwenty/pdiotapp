@@ -31,27 +31,27 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
             android:background="@drawable/login_btn_bg"
-            android:text="Predict activity"
+            android:text="Live Activity Recognition"
             android:textColor="#FFFFFF"
-            app:layout_constraintBottom_toTopOf="@+id/record_button"
+            app:layout_constraintBottom_toTopOf="@+id/previous_data_button"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/topText" />
 
-        <Button
-            android:id="@+id/record_button"
-            android:layout_width="550px"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="100px"
-            android:background="@drawable/login_btn_bg"
-            android:text="Record data"
-            android:textColor="#FFFFFF"
-            app:layout_constraintBottom_toTopOf="@+id/live_button"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.502"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/predict_button" />
+        <!--        <Button-->
+        <!--            android:id="@+id/record_button"-->
+        <!--            android:layout_width="550px"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="100px"-->
+        <!--            android:background="@drawable/login_btn_bg"-->
+        <!--            android:text="Record data"-->
+        <!--            android:textColor="#FFFFFF"-->
+        <!--            app:layout_constraintBottom_toTopOf="@+id/live_button"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintHorizontal_bias="0.502"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@+id/predict_button" />-->
 
         <Button
             android:id="@+id/live_button"
@@ -59,13 +59,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
             android:background="@drawable/login_btn_bg"
-            android:text="Watch live processing"
+            android:text="Live Movement Graphs"
             android:textColor="#FFFFFF"
-            app:layout_constraintBottom_toTopOf="@+id/ble_button"
+            app:layout_constraintBottom_toTopOf="@+id/logout_button"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/record_button" />
+            app:layout_constraintTop_toBottomOf="@+id/ble_button" />
 
         <Button
             android:id="@+id/ble_button"
@@ -78,7 +78,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/live_button" />
+            app:layout_constraintTop_toBottomOf="@+id/previous_data_button"
+            app:layout_constraintBottom_toTopOf="@id/live_button"/>
 
 
         <Button
@@ -87,12 +88,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
             android:background="@drawable/login_btn_bg"
-            android:text="Previous Data"
+            android:text="History"
             android:textColor="#FFFFFF"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ble_button" />
+            app:layout_constraintTop_toBottomOf="@+id/predict_button" />
 
         <Button
             android:id="@+id/logout_button"
@@ -105,7 +106,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/previous_data_button" />
+            app:layout_constraintTop_toBottomOf="@+id/live_button" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

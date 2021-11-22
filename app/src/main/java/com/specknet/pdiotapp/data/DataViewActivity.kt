@@ -36,7 +36,6 @@ class DataViewActivity : AppCompatActivity() {
 
         email = intent.getStringExtra("email_id")!!
 
-        //TODO: change this to accept whatever email is passed through
         db.collection(email)
             .get()
             .addOnSuccessListener { result ->
@@ -45,6 +44,9 @@ class DataViewActivity : AppCompatActivity() {
                     list_of_docs.add(myData)
                     Log.d("DataView","${myData}")
                 }
+
+                list_of_docs.sortBy { it.get("timeStamp").toString() }
+
                 itemAdapter = ItemAdapter(this, list_of_docs)
                 //Log.d("DataView",items.get(0) as String)
 
