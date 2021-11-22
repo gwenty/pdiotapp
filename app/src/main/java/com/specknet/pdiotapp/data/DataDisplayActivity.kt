@@ -20,23 +20,28 @@ import kotlinx.android.synthetic.main.activity_data_display.view.*
 class DataDisplayActivity : AppCompatActivity() {
 
     lateinit var textView: TextView
+    lateinit var textView2 : TextView
     lateinit var pieChart: PieChart
     lateinit var pl : ArrayList<Long>
     lateinit var txt : String
+    lateinit var txt2 : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_data_display)
         textView = date_view
+        textView2 = date_view2
         pieChart = pie_chart
         val bundle : Bundle = intent.extras!!
         val recv = bundle.get("pl")
         Log.d("DataDisplayActivity", "receiving pl ${recv}")
         txt = intent.getStringExtra("formattedTime").toString()
+        txt2 = intent.getStringExtra("txt2").toString()
         pl = recv as ArrayList<Long>
 
         //Set textView info here
         textView.text = txt
+        textView2.text = txt2
 
         //pieChartSetUpHere
         pieChart.setDrawHoleEnabled(true)
@@ -110,8 +115,6 @@ class DataDisplayActivity : AppCompatActivity() {
 
         pieChart.setData(pieData)
         pieChart.invalidate()
-
-
 
         //Set pieChart info here
 

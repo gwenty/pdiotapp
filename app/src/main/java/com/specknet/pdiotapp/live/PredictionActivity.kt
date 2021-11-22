@@ -79,7 +79,7 @@ class PredictionActivity : AppCompatActivity() {
 
     lateinit var input: EditText
     lateinit var output: TextView
-    lateinit var button: Button
+    //lateinit var button: Button
     lateinit var current_activity : TextView
     lateinit var respeckClassifier: Interpreter
     lateinit var thingyClassifier: Interpreter
@@ -151,7 +151,7 @@ class PredictionActivity : AppCompatActivity() {
         labels = res.getStringArray( R.array.activity_types )
 
         output = findViewById(R.id.ouput)
-        button = findViewById(R.id.button)
+        //button = findViewById(R.id.button)
         current_activity = findViewById(R.id.current_activity)
 
         respeckClassifier = Interpreter(loadModelFile(getRespeckModelPath()))
@@ -177,7 +177,7 @@ class PredictionActivity : AppCompatActivity() {
             saveData()
         }
 
-
+        /*
         button.setOnClickListener {
             val test_instance = readTestInstance()
             //val respeckPrediction = inference(test_instance, respeckClassifier)
@@ -200,6 +200,7 @@ class PredictionActivity : AppCompatActivity() {
 
             thread.start()
         }
+         */
 
         //Joe: initialising the respeck Receiver
         respeckLiveUpdateReceiver = object : BroadcastReceiver() {
@@ -426,7 +427,7 @@ class PredictionActivity : AppCompatActivity() {
 
         updatePredictionOutput(prediction)
 
-        button.setBackgroundColor(updateButtonColor[i])
+        //button.setBackgroundColor(updateButtonColor[i])
     }
 
     /** Memory-map the model file in Assets.  */
@@ -527,6 +528,7 @@ class PredictionActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 documentReference ->
                 Toast.makeText(this,"added with ${documentReference.id}",Toast.LENGTH_SHORT)
+                predictionList.clear()
             }
             .addOnFailureListener {
                 e ->

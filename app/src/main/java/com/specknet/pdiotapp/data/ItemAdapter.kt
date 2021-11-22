@@ -68,16 +68,19 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
         } else if (day.equals("23") or day.equals("3") or day.equals("33")) {
             dayApp = "rd"
         }
-
         val month = months[tsSplit[1].toInt()-1]
 
-
-
         val year = tsSplit[2].split("_")[0]
+
+        val hours = tsSplit[2].split("_")[1]
+
+        val minutes = tsSplit[3]
+
+        val seconds = tsSplit[4]
+
         val txt = "${day}${dayApp} ${month} ${year}"
-
-
-
+        val txt2 = "${hours}:${minutes}"
+        holder.sndTxt.text = txt2
         holder.tvTimeStamp.text = txt
 
         //Making piechart here
@@ -165,6 +168,7 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
                 Intent(context,DataDisplayActivity::class.java)
             intent.putExtra("formattedTime", txt)
             intent.putExtra("pl", pl)
+            intent.putExtra("txt2", txt2)
             Log.d("ItemAdapter", "Passing the pl: ${pl}")
             context.startActivity(intent)
         }
@@ -187,5 +191,6 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
         val cardViewItem = view.card_view
         val pieChart = view.pie_chart
         val toActivityBtn = view.btn_to_display_view
+        val sndTxt = view.tv_secondary
     }
 }
