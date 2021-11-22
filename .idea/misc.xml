@@ -3,7 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="app/src/main/res/layout/activity_prediction.xml" value="0.1" />
+        <entry key="app/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_prediction.xml" value="0.22" />
         <entry key="app/src/main/res/drawable/btn_top.xml" value="0.25052083333333336" />
         <entry key="app/src/main/res/drawable/ic_bluetooth_icon.xml" value="0.2703125" />
         <entry key="app/src/main/res/drawable/ic_email.xml" value="0.25052083333333336" />
