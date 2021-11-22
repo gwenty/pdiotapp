@@ -45,6 +45,7 @@ import java.net.URLEncoder
 import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.function.UnaryOperator
 import kotlin.collections.HashMap
 
 
@@ -54,7 +55,7 @@ class PredictionActivity : AppCompatActivity() {
     //Joe: BlueTooth variables
     var count = 0
     var countThingy = 0
-    var windowsize = 20
+    var windowsize = 25
     var n_classes = 18
 
     //Joe: data store variables
@@ -74,6 +75,7 @@ class PredictionActivity : AppCompatActivity() {
     val updateButtonColor = arrayOf(Color.RED, Color.GREEN)
     lateinit var respeckPrediction: FloatArray
     lateinit var thingyPrediction: FloatArray
+    var previousClass: Int = -1
 
     lateinit var input: EditText
     lateinit var output: TextView
@@ -113,6 +115,31 @@ class PredictionActivity : AppCompatActivity() {
                                 R.drawable.falling,
                                 R.drawable.falling)
 
+    // Stuff for state machine
+    private val sitting = arrayListOf(1F,1F,1F,1F,0F,0F,0F,0F,0F,0F,0F,0F,1F,1F,1F,1F,1F,1F)
+    private val sitting_forward = arrayListOf(1F,1F,1F,1F,0F,0F,0F,0F,0F,0F,0F,0F,1F,1F,1F,1F,1F,1F)
+    private val sitting_backward = arrayListOf(1F,1F,1F,1F,0F,0F,0F,0F,0F,0F,0F,0F,1F,1F,1F,1F,1F,1F)
+    private val standing = arrayListOf(1F,1F,1F,1F,0F,0F,0F,0F,1F,1F,1F,1F,1F,1F,1F,1F,1F,1F)
+    private val lying_left = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
+    private val lying_right = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
+    private val lying_stomach = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
+    private val lying_back = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
+    private val walking = arrayListOf(0F,0F,0F,1F,0F,0F,0F,0F,1F,1F,1F,1F,0F,1F,1F,1F,1F,1F)
+    private val running = arrayListOf(0F,0F,0F,1F,0F,0F,0F,0F,1F,1F,1F,1F,0F,1F,1F,1F,1F,1F)
+    private val climbing_stairs = arrayListOf(0F,0F,0F,1F,0F,0F,0F,0F,1F,1F,1F,1F,0F,1F,1F,1F,1F,1F)
+    private val descending_stairs = arrayListOf(0F,0F,0F,1F,0F,0F,0F,0F,1F,1F,1F,1F,0F,1F,1F,1F,1F,1F)
+    private val desk_work = arrayListOf(1F,1F,1F,1F,0F,0F,0F,0F,0F,0F,0F,0F,1F,1F,1F,1F,1F,1F)
+    private val movement = arrayListOf(1F,1F,1F,1F,1F,1F,1F,1F,1F,1F,1F,1F,1F,1F,1F,1F,1F,1F)
+    private val falling_knees = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
+    private val falling_back = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
+    private val falling_left = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
+    private val falling_right = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
+
+    private val state_machine = arrayListOf(sitting, sitting_forward, sitting_backward,
+            standing, lying_left, lying_right, lying_stomach, lying_back,
+            walking, running, climbing_stairs, descending_stairs, desk_work,
+            movement, falling_knees, falling_back, falling_left, falling_right)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_prediction)
@@ -133,6 +160,15 @@ class PredictionActivity : AppCompatActivity() {
         thingyPrediction = FloatArray(n_classes)
         respeckPrediction = FloatArray(n_classes)
 
+        // Set the penalty in the state machine
+        for (p in 0 until state_machine.size) {
+            for (s in 0 until state_machine[p].size) {
+                if (state_machine[p][s] == 0F) {
+                    state_machine[p][s] = 0.5F
+                }
+            }
+        }
+
         var i = 0
 
         var lastUpdate = System.currentTimeMillis()
@@ -144,12 +180,13 @@ class PredictionActivity : AppCompatActivity() {
 
         button.setOnClickListener {
             val test_instance = readTestInstance()
-            val respeckPrediction = inference(test_instance, respeckClassifier)
-            val thingyPrediction = inference(test_instance, thingyClassifier)
+            //val respeckPrediction = inference(test_instance, respeckClassifier)
+            //val thingyPrediction = inference(test_instance, thingyClassifier)
 
             val thread = Thread {
                 try {
-                    var prediction = sendGet(readTestInstance(), "respeck_prediction")
+                    var prediction = sendGet(readTestInstance(), "thingy_prediction")
+                    Log.i("response", prediction.toString())
                     if (prediction != null) {
                         runOnUiThread {
                             // change UI elements here
@@ -204,7 +241,7 @@ class PredictionActivity : AppCompatActivity() {
 
                         val thread = Thread {
                             try {
-                                respeckPrediction = sendGet(collected_instance, "respeck_prediction")
+                                respeckPrediction = sendGet(collected_instance, "thingy_prediction")
                                 if (respeckPrediction != null) {
                                     runOnUiThread {
                                         // change UI elements here
@@ -335,16 +372,27 @@ class PredictionActivity : AppCompatActivity() {
     }
 
     private fun updatePredictionOutput(prediction : FloatArray) {
-        val max_prob = prediction.maxOrNull()
-        val max_idx = prediction.asList().indexOf(max_prob)
+        //val max_prob = prediction.maxOrNull()
+        //val max_idx = prediction.asList().indexOf(max_prob)
+        var weighted_prediction: FloatArray = FloatArray(n_classes)
 
-        output.text = max_prob.toString()
+        if (previousClass != -1)
+            // Multiply the predicted probabilities with the transitions from the previous class
+            for (i in 0 until n_classes)
+                weighted_prediction[i] = state_machine[previousClass][i] * prediction[i]
+        else
+            weighted_prediction = prediction
+
+        val max_prob = weighted_prediction.maxOrNull()
+        val max_idx = weighted_prediction.asList().indexOf(max_prob)
+        previousClass = max_idx
+
+        output.text = "%.2f".format(max_prob)//max_prob.toString()
         // current_activity.text = labels[idxs[max_idx]]
         current_activity.text = labels[max_idx]
 
         // activity_icon.setImageResource(icons[idxs[max_idx]])
         activity_icon.setImageResource(icons[max_idx])
-
 
         //Joe: adding the prediction to the list
         predictionList.add(max_idx)
@@ -444,7 +492,7 @@ class PredictionActivity : AppCompatActivity() {
     private fun readTestInstance(): Array<FloatArray> {
         val rows = windowsize
         val cols = 6
-        val reader = BufferedReader(InputStreamReader(assets.open("test_instance_window20_0.txt")))
+        val reader = BufferedReader(InputStreamReader(assets.open("test_instance_window25_0.txt")))
         var counter = 0
         val test_instance = Array(rows) { FloatArray(cols) }
         while (true) {
