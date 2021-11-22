@@ -47,7 +47,7 @@ class DataDisplayActivity : AppCompatActivity() {
         pieChart.setDrawHoleEnabled(true)
         pieChart.setUsePercentValues(true)
         pieChart.setDrawEntryLabels(true)
-        pieChart.setEntryLabelTextSize(16f)
+        pieChart.setEntryLabelTextSize(12f)
         pieChart.setEntryLabelColor(Color.BLACK)
         pieChart.description = null
         pieChart.centerText = "Activities Done"
@@ -74,7 +74,7 @@ class DataDisplayActivity : AppCompatActivity() {
             "Falling on the right", "Falling on the back")
 
         var dataCulmination : MutableMap<Int, Int> = mutableMapOf(
-            0 to 1, 1 to 0, 2 to 0, 3 to 0, 4 to 0, 5 to 0, 6 to 0, 7 to 0,
+            0 to 0, 1 to 0, 2 to 0, 3 to 0, 4 to 0, 5 to 0, 6 to 0, 7 to 0,
             8 to 0, 9 to 0, 10 to 0, 11 to 0, 12 to 0, 13 to 0, 14 to 0,
             15 to 0, 16 to 0, 17 to 0,
         )
