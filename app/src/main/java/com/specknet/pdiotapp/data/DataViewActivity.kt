@@ -14,6 +14,7 @@ class DataViewActivity : AppCompatActivity() {
 
     lateinit var recyclerView : RecyclerView
     lateinit var itemAdapter: ItemAdapter
+    lateinit var email : String
 
 
 
@@ -33,8 +34,10 @@ class DataViewActivity : AppCompatActivity() {
         val db = Firebase.firestore
         var list_of_docs : ArrayList<Map<String, Object>> = ArrayList()
 
+        email = intent.getStringExtra("email_id")!!
+
         //TODO: change this to accept whatever email is passed through
-        db.collection("alphabetter@sharklasers.com")
+        db.collection(email)
             .get()
             .addOnSuccessListener { result ->
                 for (document in result) {
