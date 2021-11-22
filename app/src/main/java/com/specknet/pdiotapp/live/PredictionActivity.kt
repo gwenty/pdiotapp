@@ -74,7 +74,7 @@ class PredictionActivity : AppCompatActivity() {
     val contQueueRespeck: Queue<FloatArray> = LinkedList<FloatArray>()
     val contQueueThingy: Queue<FloatArray> = LinkedList<FloatArray>()
     //Joe: sync time varibales
-    var timePassed = 0
+    var timePassed = 0L
 
     val updateButtonColor = arrayOf(Color.RED, Color.GREEN)
     lateinit var respeckPrediction: FloatArray
@@ -96,6 +96,16 @@ class PredictionActivity : AppCompatActivity() {
     lateinit var looperThingy: Looper
     val filterTestThingy = IntentFilter(Constants.ACTION_THINGY_BROADCAST)
 
+    // For grouping ino subsets
+    private var subset_labels = arrayOf("Sitting/standing", "Walking", "Running", "Lying Down", "Falling")
+    val sitting_activities = arrayOf(0,1,2,3,12)
+    val walking_activities = arrayOf(8,10,11,13)
+    val running_activities = arrayOf(9)
+    val lying_activities = arrayOf(4,5,6,7)
+    val falling_activities = arrayOf(14,15,16,17)
+    val subset_ixs = arrayOf(0,0,0,0,3,3,3,3,1,2,1,1,0,1,4,4,4,4)
+    val subset_activities = arrayOf(sitting_activities, walking_activities, running_activities, lying_activities, falling_activities)
+
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
     // N.B. when we classify all classes, idxs array will not be needed
@@ -110,9 +120,9 @@ class PredictionActivity : AppCompatActivity() {
                                 R.drawable.lying,
                                 R.drawable.walking,
                                 R.drawable.running,
-                                R.drawable.stairs,
-                                R.drawable.stairs,
-                                R.drawable.desk,
+                                R.drawable.walking,
+                                R.drawable.walking,
+                                R.drawable.sitting,
                                 R.drawable.movement,
                                 R.drawable.falling,
                                 R.drawable.falling,
@@ -170,7 +180,7 @@ class PredictionActivity : AppCompatActivity() {
         for (p in 0 until state_machine.size) {
             for (s in 0 until state_machine[p].size) {
                 if (state_machine[p][s] == 0F) {
-                    state_machine[p][s] = 0.5F
+                    state_machine[p][s] = 0.4F
                 }
             }
         }
@@ -213,6 +223,9 @@ class PredictionActivity : AppCompatActivity() {
             override fun onReceive(context: Context, intent: Intent) {
 
                 Log.i("thread", "I am running on thread = " + Thread.currentThread().name)
+                //runOnUiThread {
+                //    time.text = timePassed.toString()
+                //}
 
                 val action = intent.action
 
@@ -241,9 +254,10 @@ class PredictionActivity : AppCompatActivity() {
 
                     count +=1
 
-                    var timePassed = System.currentTimeMillis() - lastUpdate
+                    timePassed = System.currentTimeMillis() - lastUpdate
                     //if (contQueueRespeck.size == windowsize && count >= checkTime && timePassed > 1000) {
                     if (contQueueRespeck.size == windowsize && timePassed > 1000) {
+                        lastUpdate = System.currentTimeMillis()
                         var collected_instance = contQueueRespeck.toTypedArray()
 
                         val thread = Thread {
@@ -253,8 +267,8 @@ class PredictionActivity : AppCompatActivity() {
                                     runOnUiThread {
                                         // change UI elements here
                                         updatePrediction(i)
-                                        time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
-                                        lastUpdate = System.currentTimeMillis()
+                                        //time.text = timePassed.toString()//((System.currentTimeMillis() - lastUpdate)).toString()
+
                                     }
                                 }
                             } catch (e: Exception) {
@@ -313,22 +327,20 @@ class PredictionActivity : AppCompatActivity() {
                     //Joe: adding new  data to the queue
                     contQueueThingy.add(floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz))
 
-
-
                     //If queue > window size then we need to drop the oldest piece of data
                     while (contQueueThingy.size > windowsize) {
                         contQueueThingy.remove()
                     }
 
                     countThingy +=1
-                    timePassed = (System.currentTimeMillis() - lastUpdate).toInt()
+                    timePassed = System.currentTimeMillis() - lastUpdate
 
                     //if (contQueueThingy.size == windowsize && countThingy >= checkTime && timePassed > 1000) {
                     if (contQueueThingy.size == windowsize && timePassed > 1000) {
+                        lastUpdate = System.currentTimeMillis()
                         var collected_instance = contQueueThingy.toTypedArray()
 
                         var res_inst = contQueueRespeck.toTypedArray()
-                        lastUpdate = System.currentTimeMillis()
 
 
                         val thread = Thread {
@@ -344,8 +356,7 @@ class PredictionActivity : AppCompatActivity() {
                                     runOnUiThread {
                                         // change UI elements here
                                         updatePrediction(i)
-                                        time.text = ((System.currentTimeMillis() - lastUpdate)).toString()
-                                        lastUpdate = System.currentTimeMillis()
+                                        //time.text = timePassed.toString()//((System.currentTimeMillis() - lastUpdate)).toString()
                                     }
                                 }
                             } catch (e: Exception) {
@@ -378,6 +389,23 @@ class PredictionActivity : AppCompatActivity() {
         this.registerReceiver(thingyLiveUpdateReceiver, filterTestThingy, null, handlerThingy)
     }
 
+    private fun normalise(prediction : FloatArray) : FloatArray{
+        val sum = prediction.sum()
+        for (i in prediction.indices) {
+            prediction[i] = prediction[i] / sum
+        }
+        return prediction
+    }
+
+    private fun groupPrediction(prediction : FloatArray, subset : Int) : Float {
+        // Sum over that group
+        var subset_prediction = 0F
+        for (activity in subset_activities[subset].indices)
+            subset_prediction += prediction[subset_activities[subset][activity]]
+
+        return subset_prediction
+    }
+
     private fun updatePredictionOutput(prediction : FloatArray) {
         //val max_prob = prediction.maxOrNull()
         //val max_idx = prediction.asList().indexOf(max_prob)
@@ -389,14 +417,18 @@ class PredictionActivity : AppCompatActivity() {
                 weighted_prediction[i] = state_machine[previousClass][i] * prediction[i]
         else
             weighted_prediction = prediction
+        weighted_prediction = normalise(weighted_prediction)
 
         val max_prob = weighted_prediction.maxOrNull()
         val max_idx = weighted_prediction.asList().indexOf(max_prob)
         previousClass = max_idx
 
-        output.text = "%.2f".format(max_prob)//max_prob.toString()
+        val subset = subset_ixs[max_idx]
+        val subset_prediction = groupPrediction(weighted_prediction, subset)
+
         // current_activity.text = labels[idxs[max_idx]]
-        current_activity.text = labels[max_idx]
+        output.text = labels[max_idx] + " (" + "%.2f".format(max_prob) + ")"
+        current_activity.text = subset_labels[subset] + " (" + "%.2f".format(subset_prediction) + ")"
 
         // activity_icon.setImageResource(icons[idxs[max_idx]])
         activity_icon.setImageResource(icons[max_idx])
@@ -478,19 +510,6 @@ class PredictionActivity : AppCompatActivity() {
 
     private fun getThingyModelPath(): String {
         return "cnn_simple_full_thingy.tflite"
-    }
-
-    // For later - not in use
-    @Throws(IOException::class)
-    private fun getLabels(assetManager: AssetManager, labelPath: String): List<String> {
-        val labels = ArrayList<String>()
-        val reader = BufferedReader(InputStreamReader(assetManager.open(labelPath)))
-        while (true) {
-            val label = reader.readLine() ?: break
-            labels.add(label)
-        }
-        reader.close()
-        return labels
     }
 
 

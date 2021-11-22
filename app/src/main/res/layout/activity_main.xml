@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
             android:background="@drawable/login_btn_bg"
-            android:text="Live Activity Catergorisation"
+            android:text="Live Activity Recognition"
             android:textColor="#FFFFFF"
             app:layout_constraintBottom_toTopOf="@+id/previous_data_button"
             app:layout_constraintEnd_toEndOf="parent"
