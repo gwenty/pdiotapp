@@ -130,10 +130,10 @@ class PredictionActivity : AppCompatActivity() {
     private val sitting_forward = arrayListOf(1F,1F,1F,1F,0F,0F,0F,0F,0F,0F,0F,0F,1F,1F,1F,1F,1F,1F)
     private val sitting_backward = arrayListOf(1F,1F,1F,1F,0F,0F,0F,0F,0F,0F,0F,0F,1F,1F,1F,1F,1F,1F)
     private val standing = arrayListOf(1F,1F,1F,1F,0F,0F,0F,0F,1F,1F,1F,1F,0F,1F,1F,1F,1F,1F)
-    private val lying_left = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
-    private val lying_right = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
-    private val lying_stomach = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
-    private val lying_back = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,0F,1F,0F,0F,0F,0F)
+    private val lying_left = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,-1F,1F,0F,0F,0F,0F)
+    private val lying_right = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,-1F,1F,0F,0F,0F,0F)
+    private val lying_stomach = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,-1F,1F,0F,0F,0F,0F)
+    private val lying_back = arrayListOf(0F,0F,0F,0F,1F,1F,1F,1F,0F,0F,0F,0F,-1F,1F,0F,0F,0F,0F)
     private val walking = arrayListOf(0F,0F,0F,1F,0F,0F,0F,0F,1F,1F,1F,1F,0F,1F,1F,1F,1F,1F)
     private val running = arrayListOf(0F,0F,0F,1F,0F,0F,0F,0F,1F,1F,1F,1F,0F,1F,1F,1F,1F,1F)
     private val climbing_stairs = arrayListOf(0F,0F,0F,1F,0F,0F,0F,0F,1F,1F,1F,1F,0F,1F,1F,1F,1F,1F)
@@ -176,9 +176,11 @@ class PredictionActivity : AppCompatActivity() {
                 if (state_machine[p][s] == 0F) {
                     state_machine[p][s] = 0.4F
                 }
+                else if (state_machine[p][s] == -1F) {
+                    state_machine[p][s] = 0F
+                }
             }
         }
-
         var i = 0
 
         var lastUpdate = System.currentTimeMillis()
@@ -479,8 +481,14 @@ class PredictionActivity : AppCompatActivity() {
             test_instance, "UTF-8")
 
         Log.i("requests","Sending request")
+        val before = System.currentTimeMillis()
         val response = URL("http://pdiot.eu.pythonanywhere.com/"+ url + "?"+params).readText()
+
         Log.i("requests",response)
+        val after = System.currentTimeMillis()
+        Log.i("requests_before", (before).toString())
+        Log.i("requests_after", (after).toString())
+        Log.i("requests_time", (before - after).toString())
 
         var map: Map<String, ArrayList<ArrayList<Double>>> = HashMap()
         map = Gson().fromJson(response, map.javaClass)
@@ -553,9 +561,6 @@ class PredictionActivity : AppCompatActivity() {
                 e ->
                 Toast.makeText(this,"error: ${e.message}", Toast.LENGTH_SHORT)
             }
-
-
-
     }
 
 
