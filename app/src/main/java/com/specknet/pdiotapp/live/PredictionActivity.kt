@@ -544,6 +544,7 @@ class PredictionActivity : AppCompatActivity() {
         val dataPacket = hashMapOf(
             "timeStamp" to uploadTime,
             "predictionList" to predictionList
+            , "startTime" to startTiming
         )
 
         db.collection(userEmailGlob)
