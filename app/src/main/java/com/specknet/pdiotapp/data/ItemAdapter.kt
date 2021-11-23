@@ -57,6 +57,18 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
                 )
         //Format our timeStamp here
         //Import format is dd-mm-yyyy_hh-mm-ss
+
+
+
+        val startTime = data.get("startTime") as String
+        val stSplit = startTime.split('-')
+
+        val sThours = stSplit[2].split("_")[1]
+
+        val sTminutes = stSplit[3]
+
+        val sTseconds = stSplit[4]
+
         val ts = data.get("timeStamp") as String
         val tsSplit = ts.split('-')
         val day = tsSplit[0]
@@ -79,7 +91,7 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
         val seconds = tsSplit[4]
 
         val txt = "${day}${dayApp} ${month} ${year}"
-        val txt2 = "${hours}:${minutes}"
+        val txt2 = "${sThours}:${sTminutes}:${sTseconds} to ${hours}:${minutes}:${seconds}"
         holder.sndTxt.text = txt2
         holder.tvTimeStamp.text = txt
 
@@ -118,10 +130,44 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
             "Falling on the right", "Falling on the back")
 
         var dataCulmination : MutableMap<Int, Int> = mutableMapOf(
-            0 to 1, 1 to 0, 2 to 0, 3 to 0, 4 to 0, 5 to 0, 6 to 0, 7 to 0,
+            0 to 0, 1 to 0, 2 to 0, 3 to 0, 4 to 0, 5 to 0, 6 to 0, 7 to 0,
             8 to 0, 9 to 0, 10 to 0, 11 to 0, 12 to 0, 13 to 0, 14 to 0,
             15 to 0, 16 to 0, 17 to 0,
         )
+
+
+
+        // Subset into the pie chart
+        // For grouping ino subsets
+        var subset_labels = arrayOf("Sitting/standing", "Walking", "Running", "Lying Down", "Falling")
+        val sitting_activities = arrayOf(0,1,2,3,12)
+        val walking_activities = arrayOf(8,10,11,13)
+        val running_activities = arrayOf(9)
+        val lying_activities = arrayOf(4,5,6,7)
+        val falling_activities = arrayOf(14,15,16,17)
+        val subset_ixs = arrayOf(0,0,0,0,3,3,3,3,1,2,1,1,0,1,4,4,4,4)
+        val subset_activities = arrayOf(sitting_activities, walking_activities, running_activities, lying_activities, falling_activities)
+
+        var dataSubsetCulmination : MutableMap<Int, Int> = mutableMapOf (
+            0 to 0,
+            1 to 0,
+            2 to 0,
+            3 to 0,
+            4 to 0
+            )
+
+        for (pred in pl) {
+            dataSubsetCulmination[subset_ixs[pred.toInt()]] = 1 + dataSubsetCulmination[subset_ixs[pred.toInt()]]!!
+        }
+
+        //Setting entries
+        var entries:ArrayList<PieEntry> = ArrayList()
+        for (i in 0..4){
+            if (dataSubsetCulmination[i]!! > 0){
+                entries.add(PieEntry(dataSubsetCulmination[i]!!.toFloat(),subset_labels[i]))
+            }
+        }
+
 
         for (pred in pl){
             dataCulmination[pred.toInt()] = 1 + dataCulmination[pred.toInt()]!!
@@ -141,6 +187,7 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
 
         Log.d("ItemAdapter", "colors: ${colors}")
 
+        /*
         //Setting entries
         var entries:ArrayList<PieEntry> = ArrayList()
         for (i in 0..17){
@@ -148,6 +195,7 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
                 entries.add(PieEntry(dataCulmination[i]!!.toFloat(),labels[i]))
             }
         }
+         */
 
         var dataSet : PieDataSet = PieDataSet(entries, "Activity")
         dataSet.setColors(colors)

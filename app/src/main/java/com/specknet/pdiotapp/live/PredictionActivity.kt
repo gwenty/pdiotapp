@@ -58,11 +58,15 @@ class PredictionActivity : AppCompatActivity() {
     var windowsize = 25
     var n_classes = 18
 
+
     //Joe: data store variables
     var predictionList : ArrayList<Int> = ArrayList()
     var userEmailGlob = " "
 
 
+    var startTiming = SimpleDateFormat("dd-MM-yyyy_HH-mm-ss", Locale.UK).format(
+        Date()
+    )
 
     var checkTime = 20
     //Joe: continuous window variables
@@ -156,7 +160,9 @@ class PredictionActivity : AppCompatActivity() {
 
         var userEmail = intent.getStringExtra("email_id")
         userEmailGlob = userEmail!!
-
+        startTiming = SimpleDateFormat("dd-MM-yyyy_HH-mm-ss", Locale.UK).format(
+            Date()
+        )
         val res: Resources = resources
         labels = res.getStringArray( R.array.activity_types )
 
@@ -506,8 +512,6 @@ class PredictionActivity : AppCompatActivity() {
         return floatArray
     }
 
-
-
     private fun getRespeckModelPath(): String {
         return "cnn_simple_full.tflite"
     }
@@ -548,18 +552,23 @@ class PredictionActivity : AppCompatActivity() {
         val dataPacket = hashMapOf(
             "timeStamp" to uploadTime,
             "predictionList" to predictionList
+            , "startTime" to startTiming
         )
 
         db.collection(userEmailGlob)
             .add(dataPacket)
             .addOnSuccessListener {
                 documentReference ->
-                Toast.makeText(this,"added with ${documentReference.id}",Toast.LENGTH_SHORT)
+                Toast.makeText(this,"Saved Data",Toast.LENGTH_SHORT).show()
+
                 predictionList.clear()
+                startTiming = SimpleDateFormat("dd-MM-yyyy_HH-mm-ss", Locale.UK).format(
+                    Date()
+                )
             }
             .addOnFailureListener {
                 e ->
-                Toast.makeText(this,"error: ${e.message}", Toast.LENGTH_SHORT)
+                Toast.makeText(this,"error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
