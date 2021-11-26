@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.specknet.pdiotapp">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -95,7 +96,8 @@
         <service
             android:name=".bluetooth.BluetoothService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="MissingClass">
             <intent-filter>
                 <action android:name="com.specknet.respeckmodeltesting.RESPECK_BROADCAST" />
             </intent-filter>

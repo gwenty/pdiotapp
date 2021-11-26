@@ -20,9 +20,11 @@
     <string name="section_bluetooth">Welcome to the PDIoT App. Use it to connect to your Respeck or Thingy devices.</string>
     <string name="section_record">You can record data from the sensors in a locally stored csv file.</string>
     <string name="section_live">You can also view the live data once the sensors are connected.</string>
+    <string name="section_history">You can view previous recordings from the history tab</string>
     <string name="section_bluetooth_title">Connect</string>
     <string name="section_record_title">Record</string>
     <string name="section_live_title">View</string>
+    <string name="section_history_title">History</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

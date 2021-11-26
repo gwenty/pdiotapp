@@ -58,12 +58,6 @@ class MainActivity : AppCompatActivity() {
         var userEmail = intent.getStringExtra("email_id")
         topText.text = "Logged in as: $userEmail"
         userEmailGlob = userEmail!!
-        logout_button.setOnClickListener {
-            FirebaseAuth.getInstance().signOut()
-
-            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-            finish()
-        }
 
         // check whether the onboarding screen should be shown
         val sharedPreferences = getSharedPreferences(Constants.PREFERENCES_FILE, Context.MODE_PRIVATE)
@@ -103,6 +97,14 @@ class MainActivity : AppCompatActivity() {
                 userEmailGlob
             )
             startActivity(intent)
+        }
+
+        logout_button.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+
+            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+
+            finish()
         }
 
         pairingButton.setOnClickListener {

@@ -25,6 +25,7 @@ import android.os.HandlerThread
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import android.util.Log.INFO
 import android.widget.Toast
 import com.google.firebase.firestore.ktx.firestore
 import com.specknet.pdiotapp.R
@@ -96,7 +97,7 @@ class PredictionActivity : AppCompatActivity() {
     lateinit var looperThingy: Looper
     val filterTestThingy = IntentFilter(Constants.ACTION_THINGY_BROADCAST)
 
-    // For grouping ino subsets
+    // For grouping into subsets
     private var subset_labels = arrayOf("Sitting/standing", "Walking", "Running", "Lying Down", "Falling")
     val sitting_activities = arrayOf(0,1,2,3,12)
     val walking_activities = arrayOf(8,10,11,13)
@@ -104,7 +105,9 @@ class PredictionActivity : AppCompatActivity() {
     val lying_activities = arrayOf(4,5,6,7)
     val falling_activities = arrayOf(14,15,16,17)
     val subset_ixs = arrayOf(0,0,0,0,3,3,3,3,1,2,1,1,0,1,4,4,4,4)
+
     val subset_activities = arrayOf(sitting_activities, walking_activities, running_activities, lying_activities, falling_activities)
+
 
     private var labels : Array<String> = emptyArray()
     // standing 0->3, walking 1->8
@@ -245,6 +248,7 @@ class PredictionActivity : AppCompatActivity() {
                     val gyrx = liveData.gyro.x
                     val gyry = liveData.gyro.y
                     val gyrz = liveData.gyro.z
+
 
                     //Joe: adding new  data to the queue
                     contQueueRespeck.add(floatArrayOf(accx,accy,accz,gyrx,gyry,gyrz))
@@ -551,8 +555,8 @@ class PredictionActivity : AppCompatActivity() {
 
         val dataPacket = hashMapOf(
             "timeStamp" to uploadTime,
-            "predictionList" to predictionList
-            , "startTime" to startTiming
+            "predictionList" to predictionList,
+            "startTime" to startTiming
         )
 
         db.collection(userEmailGlob)
@@ -571,7 +575,6 @@ class PredictionActivity : AppCompatActivity() {
                 Toast.makeText(this,"error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
 
     override fun onDestroy() {
         super.onDestroy()

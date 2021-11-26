@@ -26,6 +26,7 @@ class OnBoardingActivity : AppCompatActivity() {
     private lateinit var zero: ImageView
     private lateinit var one: ImageView
     private lateinit var two: ImageView
+    private lateinit var three: ImageView
     private lateinit var indicators: Array<ImageView>
 
     private var lastLeftValue = 0
@@ -55,10 +56,11 @@ class OnBoardingActivity : AppCompatActivity() {
         zero = findViewById(R.id.intro_indicator_0)
         one = findViewById(R.id.intro_indicator_1)
         two = findViewById(R.id.intro_indicator_2)
+        three = findViewById(R.id.intro_indicator_3)
 
         mCoordinator = findViewById(R.id.main_content)
 
-        indicators = arrayOf(zero, one, two)
+        indicators = arrayOf(zero, one, two,three)
 
         // Set up the ViewPages with the sections adapter
         mViewPager = findViewById(R.id.container)
@@ -69,8 +71,9 @@ class OnBoardingActivity : AppCompatActivity() {
         val color1 = ContextCompat.getColor(this, R.color.cyan)
         val color2 = ContextCompat.getColor(this, R.color.orange)
         val color3 = ContextCompat.getColor(this, R.color.green)
+        val color4 = ContextCompat.getColor(this, R.color.amber)
 
-        val colorList = arrayOf(color1, color2, color3)
+        val colorList = arrayOf(color1, color2, color3, color4)
         val evaluator = ArgbEvaluator()
 
         mViewPager.addOnPageChangeListener(object: ViewPager.OnPageChangeListener {
@@ -85,7 +88,7 @@ class OnBoardingActivity : AppCompatActivity() {
                 val colorUpdate = evaluator.evaluate(
                     positionOffset,
                     colorList[position],
-                    colorList[if (position === 2) position else position + 1]
+                    colorList[if (position === 3) position else position + 1]
                 ) as Int
                 mViewPager.setBackgroundColor(colorUpdate)
             }
@@ -98,10 +101,11 @@ class OnBoardingActivity : AppCompatActivity() {
                     0 -> mViewPager.setBackgroundColor(color1)
                     1 -> mViewPager.setBackgroundColor(color2)
                     2 -> mViewPager.setBackgroundColor(color3)
+                    3 -> mViewPager.setBackgroundColor(color4)
                 }
 
-                mNextBtn.visibility = if (position === 2) View.GONE else View.VISIBLE
-                mFinishBtn.visibility = if (position === 2) View.VISIBLE else View.GONE
+                mNextBtn.visibility = if (position === 3) View.GONE else View.VISIBLE
+                mFinishBtn.visibility = if (position === 3) View.VISIBLE else View.GONE
 
             }
 

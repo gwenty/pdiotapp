@@ -53,13 +53,6 @@ class DataDisplayActivity : AppCompatActivity() {
         pieChart.centerText = "Activities Done"
         pieChart.setCenterTextSize(20f)
 
-        var l : Legend = pieChart.legend
-        l.isEnabled = false
-        l.verticalAlignment = (Legend.LegendVerticalAlignment.TOP)
-        l.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
-        l.orientation = Legend.LegendOrientation.VERTICAL
-        l.setDrawInside(false)
-        l.setEnabled(true)
 
         var labels = arrayOf("Sitting",
             "Sitting bent forward", "Sitting bent backward",
@@ -138,13 +131,21 @@ class DataDisplayActivity : AppCompatActivity() {
         }
          */
 
-        var dataSet : PieDataSet = PieDataSet(entries, "Activity")
+        var dataSet : PieDataSet = PieDataSet(entries, " ")
         dataSet.setColors(colors)
         var pieData : PieData = PieData(dataSet)
         pieData.setDrawValues(true)
         pieData.setValueFormatter(PercentFormatter(pieChart))
         pieData.setValueTextSize(0f)
         pieData.setValueTextColor(Color.BLACK)
+
+        var l : Legend = pieChart.legend
+        l.isEnabled = true
+        l.verticalAlignment = (Legend.LegendVerticalAlignment.TOP)
+        l.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
+        l.orientation = Legend.LegendOrientation.VERTICAL
+        l.setDrawInside(false)
+        l.textSize = 15f
 
         pieChart.setData(pieData)
         pieChart.invalidate()

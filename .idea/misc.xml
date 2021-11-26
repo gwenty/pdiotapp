@@ -6,10 +6,12 @@
         <entry key="app/src/main/res/drawable/btn_top.xml" value="0.25052083333333336" />
         <entry key="app/src/main/res/drawable/ic_bluetooth_icon.xml" value="0.2703125" />
         <entry key="app/src/main/res/drawable/ic_email.xml" value="0.25052083333333336" />
+        <entry key="app/src/main/res/drawable/ic_history_icon.xml" value="0.16510416666666666" />
+        <entry key="app/src/main/res/drawable/ic_login_bg.xml" value="0.1328125" />
         <entry key="app/src/main/res/drawable/ic_recording_icon.xml" value="0.14583333333333334" />
         <entry key="app/src/main/res/drawable/ic_register_bg.xml" value="0.25052083333333336" />
         <entry key="app/src/main/res/drawable/login_bg.xml" value="0.25052083333333336" />
-        <entry key="app/src/main/res/drawable/login_btn_bg.xml" value="0.1328125" />
+        <entry key="app/src/main/res/drawable/login_btn_bg.xml" value="0.22" />
         <entry key="app/src/main/res/drawable/vec_wireless_active.xml" value="0.24635416666666668" />
         <entry key="app/src/main/res/layout/activity_connecting.xml" value="0.22604166666666667" />
         <entry key="app/src/main/res/layout/activity_connecting_new.xml" value="0.2328125" />
@@ -20,10 +22,12 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.23822463768115942" />
         <entry key="app/src/main/res/layout/activity_main2.xml" value="0.10260416666666666" />
         <entry key="app/src/main/res/layout/activity_on_boarding.xml" value="0.23822463768115942" />
-        <entry key="app/src/main/res/layout/activity_prediction.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/activity_prediction.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_recording.xml" value="0.16" />
         <entry key="app/src/main/res/layout/activity_register.xml" value="0.25" />
         <entry key="app/src/main/res/layout/data_item.xml" value="0.33" />
+        <entry key="app/src/main/res/menu/menu_main.xml" value="0.14895833333333333" />
+        <entry key="app/src/main/res/menu/menu_pager.xml" value="0.25" />
       </map>
     </option>
   </component>
