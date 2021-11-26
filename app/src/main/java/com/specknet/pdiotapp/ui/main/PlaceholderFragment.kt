@@ -20,7 +20,7 @@ class PlaceholderFragment : Fragment() {
     lateinit var img: ImageView
     lateinit var description: TextView
 
-    var bgs = arrayOf(R.drawable.ic_bluetooth_icon, R.drawable.ic_live_data_icon,R.drawable.ic_recording_icon,  R.drawable.ic_history_icon)
+    var bgs = arrayOf(R.drawable.ic_bluetooth_icon, R.drawable.ic_live_data_icon,R.drawable.running,  R.drawable.ic_history_icon)
     var texts = arrayOf(R.string.section_bluetooth,  R.string.section_live, R.string.section_record,R.string.section_history)
     var titles = arrayOf(R.string.section_bluetooth_title, R.string.section_live_title, R.string.section_record_title, R.string.section_history_title)
 
