@@ -266,9 +266,17 @@ class PredictionActivity : AppCompatActivity() {
                         lastUpdate = System.currentTimeMillis()
                         var collected_instance = contQueueRespeck.toTypedArray()
 
+                        var thingy_inst = contQueueRespeck.toTypedArray()
+
                         val thread = Thread {
                             try {
-                                respeckPrediction = sendGet(collected_instance, "thingy_prediction")
+                                if (thingy_inst.size == windowsize)
+                                {
+                                    thingyPrediction = sendGet(thingy_inst, "thingy_prediction")
+                                }
+
+
+                                respeckPrediction = sendGet(collected_instance, "respeck_prediction")
                                 if (respeckPrediction != null) {
                                     runOnUiThread {
                                         // change UI elements here

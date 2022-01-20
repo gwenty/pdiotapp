@@ -140,8 +140,8 @@ class ItemAdapter(val context: Context, val items: ArrayList<Map<String,Object>>
         // Subset into the pie chart
         // For grouping ino subsets
         var subset_labels = arrayOf("Sitting/standing", "Walking", "Running", "Lying Down", "Falling")
-        val sitting_activities = arrayOf(0,1,2,3,12)
-        val walking_activities = arrayOf(8,10,11,13)
+        val sitting_activities = arrayOf(0,1,2,3,13)
+        val walking_activities = arrayOf(8,10,11,12)
         val running_activities = arrayOf(9)
         val lying_activities = arrayOf(4,5,6,7)
         val falling_activities = arrayOf(14,15,16,17)
